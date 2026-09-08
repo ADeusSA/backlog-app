@@ -13,6 +13,10 @@ import { attachReorderable, reorderIds, type Edge } from './reorder-dnd'
 
 const GAP = 14
 const CAPTION_HEIGHT = 40
+/** Рамка и внутренние отступы карточки: 2×1 px границы + 2×5 px `p-[5px]` (см. `game-card.tsx`). */
+const CARD_CHROME = 12
+/** Зазор между обложкой и подписью — `gap-1.5` там же. */
+const COVER_CAPTION_GAP = 6
 
 interface DragState {
   draggingId: string | null
@@ -79,7 +83,15 @@ export function GameGrid(props: GameGridProps): ReactElement {
 
   const cardWidth = CARD_SIZE_WIDTH[size]
   const columns = Math.max(1, Math.floor((width + GAP) / (cardWidth + GAP)))
-  const rowHeight = Math.round((cardWidth * 4) / 3) + 10 + 6 + CAPTION_HEIGHT + GAP
+  /**
+   * Колонки резиновые (`1fr`), поэтому карточка шире заявленного размера на остаток
+   * от деления ширины сетки. Высоту строки считаем от фактической ширины колонки —
+   * иначе на размерах M и L обложка вырастала выше строки и карточки наезжали друг
+   * на друга (высота строки задаётся виртуализатором и не подстраивается сама).
+   */
+  const columnWidth = width > 0 ? (width - (columns - 1) * GAP) / columns : cardWidth
+  const coverHeight = ((columnWidth - CARD_CHROME) * 4) / 3
+  const rowHeight = Math.ceil(coverHeight) + CARD_CHROME + COVER_CAPTION_GAP + CAPTION_HEIGHT + GAP
 
   const [dragState, setDragState] = useState<DragState>({ draggingId: null, overId: null, edge: null })
   const onDragStateChange = useCallback((draggingId: string | null) => setDragState((s) => ({ ...s, draggingId })), [])
@@ -109,6 +121,12 @@ export function GameGrid(props: GameGridProps): ReactElement {
     estimateSize: () => rowHeight,
     overscan: 2
   })
+
+  // Ширина сетки меняется при ресайзе окна и открытии панели фильтров — виртуализатор
+  // держит замеры в кеше и не пересчитает их, пока его об этом не попросят.
+  useEffect(() => {
+    virtualizer.measure()
+  }, [rowHeight, virtualizer])
 
   const focusIndex = useCallback(
     (index: number) => {

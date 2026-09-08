@@ -17,6 +17,7 @@ import { toast } from '@/components/ui/toast'
 import { call } from '@/platform/api'
 import { formatDate, formatPlaytime, formatRelative } from '@/lib/format'
 import { comboFromEvent, isTypingTarget, resolveCombos } from '@/lib/hotkeys'
+import { cn } from '@/lib/utils'
 import { useSettings } from '@/stores/settings-store'
 import { PlaythroughsSection } from '@/features/sessions/playthroughs-section'
 import { SessionsSection } from '@/features/sessions/sessions-section'
@@ -361,25 +362,34 @@ function GameStrip({
   onOpen: (id: string) => void
 }): React.ReactElement {
   return (
-    <ul className="flex gap-3 overflow-x-auto pb-2">
-      {games.map((game) => (
+    // pt-1 — запас под подъём карточки на hover: overflow-x обрезает и по вертикали.
+    <ul className="flex gap-2 overflow-x-auto px-0.5 pb-2 pt-1">
+      {games.map((game) => {
+        const current = game.id === currentId
+        return (
         <li key={game.id} className="shrink-0">
           <button
             type="button"
-            className="flex w-[112px] flex-col gap-1.5 text-left"
+            aria-current={current ? 'true' : undefined}
+            className={cn(
+              'flex w-[128px] flex-col gap-1.5 rounded-[var(--r-md)] border-2 p-1.5 text-left outline-none',
+              'transition-[background,border-color,box-shadow,transform] hover:-translate-y-0.5',
+              'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--border-focus)]',
+              // Рамка текущей игры лежит внутри layout — в отличие от outline, она
+              // больше не вылезает за верхний край полосы и не спорит с hover.
+              current
+                ? 'border-[var(--accent-border)] bg-[var(--accent-soft)] hover:border-[var(--accent)]'
+                : 'border-transparent hover:border-border-2 hover:bg-[var(--surface-1)]'
+            )}
+            style={{ transitionDuration: 'var(--d-hover)' }}
             onClick={() => onOpen(game.id)}
-            style={{
-              outline: game.id === currentId ? '2px solid var(--accent)' : undefined,
-              outlineOffset: 3,
-              borderRadius: 'var(--r-md)'
-            }}
           >
             <span className="relative block">
+              {/* Без `size` обложка тянется на ширину карточки — 128 минус рамка и отступы. */}
               <CoverImage
                 fileName={game.coverFile}
                 title={game.title}
                 dominantColor={game.dominantColor}
-                size={112}
               />
               {game.position != null && (
                 <span
@@ -398,7 +408,8 @@ function GameStrip({
             </span>
           </button>
         </li>
-      ))}
+        )
+      })}
     </ul>
   )
 }

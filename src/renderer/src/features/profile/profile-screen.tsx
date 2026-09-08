@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { CalendarRange, Check, Clock3, Dices, ListPlus, Pencil, Plus, Trophy } from 'lucide-react'
+import { useQuery } from '@tanstack/react-query'
+import { CalendarRange, ListPlus, Pencil, Plus, Trophy } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { STATUS_ORDER } from '@shared/constants'
 import type { GameCardDto } from '@shared/schema/entities'
@@ -13,7 +13,6 @@ import { ProgressRing } from '@/components/ui/progress-ring'
 import { Segmented } from '@/components/ui/segmented'
 import { Skeleton } from '@/components/ui/skeleton'
 import { StatusDot } from '@/components/ui/status-badge'
-import { toast } from '@/components/ui/toast'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { call } from '@/platform/api'
 import { formatPlaytime, formatRelative, imageUrl } from '@/lib/format'
@@ -22,13 +21,14 @@ import { useSettings } from '@/stores/settings-store'
 import { useUiStore } from '@/stores/ui-store'
 import { formatActivityText } from '@/features/game/activity-text'
 import { ActivityPanel } from '@/features/sessions/activity-panel'
+import { NowPlaying } from './now-playing'
 import { ProfileEditDialog } from './profile-edit-dialog'
 
 /** Профиль (ТЗ 06 §1). */
 export function ProfileScreen(): React.ReactElement {
   const { t } = useTranslation()
   const navigate = useNavigate()
-  const queryClient = useQueryClient()
+
   const settings = useSettings()
   const setAchievementsOpen = useUiStore((s) => s.setAchievementsOpen)
   const [editing, setEditing] = useState(false)
@@ -36,10 +36,6 @@ export function ProfileScreen(): React.ReactElement {
 
   const { data: profile } = useQuery({ queryKey: ['profile'], queryFn: () => call('profile.get') })
   const { data: stats } = useQuery({ queryKey: ['stats'], queryFn: () => call('stats.get') })
-  const { data: nowPlaying } = useQuery({
-    queryKey: ['profile', 'nowPlaying'],
-    queryFn: () => call('profile.nowPlaying')
-  })
   const { data: lists } = useQuery({ queryKey: ['lists'], queryFn: () => call('lists.list') })
   const { data: activity } = useQuery({
     queryKey: ['activity'],
@@ -171,104 +167,7 @@ export function ProfileScreen(): React.ReactElement {
         )}
       </section>
 
-      <section className="flex flex-col gap-3 px-6">
-        <h2 className="type-caption">{t('profile.nowPlaying.title')}</h2>
-        {(nowPlaying?.length ?? 0) === 0 ? (
-          <div className="flex items-center gap-3">
-            <p className="type-body" style={{ color: 'var(--text-2)' }}>
-              {t('profile.nowPlaying.empty')}
-            </p>
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={() => {
-                void call('collection.random', {
-                  scope: { kind: 'library', status: 'backlog' },
-                  filters: {}
-                })
-                  .then((game) => {
-                    if (game) void navigate({ to: '/games/$gameId', params: { gameId: game.id } })
-                  })
-                  .catch(() => undefined)
-              }}
-            >
-              <Dices size={14} strokeWidth={1.75} />
-              {t('profile.nowPlaying.pick')}
-            </Button>
-          </div>
-        ) : (
-          <ul className="flex gap-3 overflow-x-auto pb-2">
-            {nowPlaying?.map((game) => (
-              <li
-                key={game.id}
-                className="flex w-[280px] shrink-0 gap-3 rounded-[var(--r-md)] p-3"
-                style={{ background: 'var(--surface-1)', border: '1px solid var(--border-1)' }}
-              >
-                <button
-                  type="button"
-                  onClick={() =>
-                    void navigate({ to: '/games/$gameId', params: { gameId: game.id } })
-                  }
-                >
-                  <CoverImage
-                    fileName={game.coverFile}
-                    title={game.title}
-                    dominantColor={game.dominantColor}
-                    size={72}
-                  />
-                </button>
-                <div className="flex min-w-0 flex-1 flex-col gap-1">
-                  <span className="truncate type-h3">{game.title}</span>
-                  <span className="type-small tabular" style={{ color: 'var(--text-2)' }}>
-                    {formatPlaytime(game.playtimeMinutes ?? 0)}
-                  </span>
-                  {game.lastActivityAt && (
-                    <span className="type-small" style={{ color: 'var(--text-3)' }}>
-                      {t('profile.nowPlaying.lastActivity', {
-                        time: formatRelative(game.lastActivityAt)
-                      })}
-                    </span>
-                  )}
-                  {game.resumeNote && (
-                    <span className="truncate type-small" style={{ color: 'var(--text-2)' }}>
-                      {game.resumeNote}
-                    </span>
-                  )}
-                  <div className="flex gap-1.5 pt-1">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => {
-                        void call('userGame.addPlaytime', { gameId: game.id, minutes: 60 })
-                          .then(() => queryClient.invalidateQueries())
-                          .catch((err: Error) => toast({ title: err.message, tone: 'danger' }))
-                      }}
-                    >
-                      <Clock3 size={14} strokeWidth={1.75} />
-                      {t('profile.nowPlaying.addTime')}
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => {
-                        void call('userGame.setStatus', { gameId: game.id, status: 'completed' })
-                          .then(() => {
-                            toast({ title: t('profile.nowPlaying.completed'), tone: 'success' })
-                            void queryClient.invalidateQueries()
-                          })
-                          .catch((err: Error) => toast({ title: err.message, tone: 'danger' }))
-                      }}
-                    >
-                      <Check size={14} strokeWidth={1.75} />
-                      {t('profile.nowPlaying.complete')}
-                    </Button>
-                  </div>
-                </div>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
+      <NowPlaying />
 
       <section className="flex flex-col gap-3 px-6">
         <h2 className="type-caption">{t('profile.favorites.title')}</h2>
