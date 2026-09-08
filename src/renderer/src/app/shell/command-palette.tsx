@@ -11,13 +11,16 @@ import {
   PanelLeft,
   Plus,
   RefreshCw,
-  Settings2
+  Settings2,
+  SunMoon
 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
 import { CoverImage } from '@/components/ui/image'
 import { StatusDot } from '@/components/ui/status-badge'
+import { useSettingsStore } from '@/stores/settings-store'
 import { useUiStore } from '@/stores/ui-store'
+import { resolveTheme } from '@/lib/theme'
 import { call } from '@/platform/api'
 import { toast } from '@/components/ui/toast'
 
@@ -98,7 +101,19 @@ export function CommandPalette(): React.ReactElement {
           useUiStore.getState().toggleSidebar()
         }
       },
-      { id: 'library', icon: LayoutGrid, label: t('palette.library'), run: () => go('/library') }
+      { id: 'library', icon: LayoutGrid, label: t('palette.library'), run: () => go('/library') },
+      {
+        id: 'theme',
+        icon: SunMoon,
+        label: t('palette.theme'),
+        run: () => {
+          setOpen(false)
+          // Переключаем то, что видно сейчас: из «системной» уходим в противоположную ей.
+          const store = useSettingsStore.getState()
+          const next = resolveTheme(store.settings.theme) === 'dark' ? 'light' : 'dark'
+          void store.patch({ theme: next })
+        }
+      }
     ],
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [t]

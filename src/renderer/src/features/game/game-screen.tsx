@@ -46,7 +46,7 @@ export function GameScreen(): React.ReactElement {
     enabled: Boolean(gameId)
   })
 
-  useGameBloom(game?.dominantColor ?? null, settings.animations)
+  useGameBloom(game?.dominantColor ?? null, settings.animations, settings.theme)
 
   useEffect(() => {
     if (game?.title) document.title = game.title

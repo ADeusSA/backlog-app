@@ -18,6 +18,7 @@ import {
 import { useTranslation } from 'react-i18next'
 import type { ImportProvider, Locale } from '@shared/constants'
 import type { ProviderStatus } from '@shared/schema/providers'
+import type { Settings } from '@shared/schema/settings'
 import { Button } from '@/components/ui/button'
 import { Segmented } from '@/components/ui/segmented'
 import { Switch } from '@/components/ui/switch'
@@ -236,10 +237,14 @@ function AppearanceSection(): React.ReactElement {
     <section className="flex max-w-[720px] flex-col">
       <h2 className="type-h2 pb-2">{t('settings.section.appearance')}</h2>
       <Row title={t('settings.theme')} description={t('settings.theme.hint')}>
-        <Segmented
-          value="dark"
-          onChange={() => undefined}
-          options={[{ value: 'dark', label: t('settings.theme.dark') }]}
+        <Segmented<Settings['theme']>
+          value={settings.theme}
+          onChange={(theme) => void patch({ theme })}
+          options={[
+            { value: 'system', label: t('settings.theme.system') },
+            { value: 'light', label: t('settings.theme.light') },
+            { value: 'dark', label: t('settings.theme.dark') }
+          ]}
         />
       </Row>
       <Separator />

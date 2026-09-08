@@ -1,4 +1,4 @@
-import { app, BrowserWindow, screen, shell } from 'electron'
+import { app, BrowserWindow, nativeTheme, screen, shell } from 'electron'
 import path from 'node:path'
 import { writeFileSync } from 'node:fs'
 import { getSettings, patchSettings } from './services/settings.service'
@@ -6,10 +6,20 @@ import { hardenWindow } from './security'
 import { shouldHideOnClose, shouldStartHidden } from './tray'
 import { log } from './log'
 
-const BG = '#0B0D14'
-const SYMBOL = '#9AA3B8'
+/** Цвета заголовка окна для обеих тем (04 §2.1, §8) — дублируют --bg-0 и --text-2. */
+const TITLEBAR = {
+  dark: { color: '#0B0D14', symbolColor: '#9AA3B8' },
+  light: { color: '#F3F4F8', symbolColor: '#545B6D' }
+} as const
 
 let mainWindow: BrowserWindow | null = null
+
+/** Тема окна: «системная» разворачивается средствами Electron. */
+function windowTheme(): 'dark' | 'light' {
+  const setting = getSettings().theme
+  if (setting !== 'system') return setting
+  return nativeTheme.shouldUseDarkColors ? 'dark' : 'light'
+}
 
 function boundsAreVisible(x: number, y: number, width: number, height: number): boolean {
   const display = screen.getDisplayMatching({ x, y, width, height })
@@ -19,6 +29,8 @@ function boundsAreVisible(x: number, y: number, width: number, height: number): 
 
 export function createWindow(): BrowserWindow {
   const settings = getSettings()
+  // До создания окна: renderer должен увидеть правильный prefers-color-scheme с первого кадра.
+  nativeTheme.themeSource = settings.theme
   const { width, height, x, y, maximized } = settings.window
   const useSavedPos = x != null && y != null && boundsAreVisible(x, y, width, height)
 
@@ -29,10 +41,10 @@ export function createWindow(): BrowserWindow {
     minWidth: 1024,
     minHeight: 680,
     show: false,
-    backgroundColor: BG,
+    backgroundColor: TITLEBAR[windowTheme()].color,
     autoHideMenuBar: true,
     titleBarStyle: 'hidden',
-    titleBarOverlay: { color: BG, symbolColor: SYMBOL, height: 44 },
+    titleBarOverlay: { ...TITLEBAR[windowTheme()], height: 44 },
     webPreferences: {
       preload: path.join(__dirname, '../preload/index.js'),
       sandbox: true,
@@ -127,7 +139,16 @@ export function getMainWindow(): BrowserWindow | null {
   return mainWindow
 }
 
-/** Перекрасить системные кнопки при смене темы (05 §1). */
-export function setTitleBarTheme(color: string, symbolColor: string): void {
-  mainWindow?.setTitleBarOverlay?.({ color, symbolColor, height: 44 })
+/**
+ * Перекрасить окно под текущую тему (05 §1, 04 §8): системные кнопки заголовка и
+ * фон окна, который виден в момент показа и при ресайзе.
+ */
+export function applyWindowTheme(): void {
+  const setting = getSettings().theme
+  // themeSource синхронизирует prefers-color-scheme в renderer с явным выбором пользователя.
+  // Присваивание только при отличии: иначе Electron заново шлёт 'updated' и мы зациклимся.
+  if (nativeTheme.themeSource !== setting) nativeTheme.themeSource = setting
+  const theme = TITLEBAR[windowTheme()]
+  mainWindow?.setTitleBarOverlay?.({ ...theme, height: 44 })
+  mainWindow?.setBackgroundColor(theme.color)
 }

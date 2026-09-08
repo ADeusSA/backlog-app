@@ -20,7 +20,9 @@
   "settings.tray.startMinimized": "Start minimised",
 
   "settings.theme": "Theme",
-  "settings.theme.hint": "This version ships the dark Aurora theme only",
+  "settings.theme.hint": "Light and dark Aurora palettes; “System” follows Windows",
+  "settings.theme.system": "System",
+  "settings.theme.light": "Light",
   "settings.theme.dark": "Dark",
   "settings.cardSize": "Default card size",
   "settings.density": "Density",

@@ -1,8 +1,8 @@
-import { app, BrowserWindow } from 'electron'
+import { app, BrowserWindow, nativeTheme } from 'electron'
 import { resolvePaths } from './paths'
 import { registerImageScheme, handleImageProtocol } from './protocol'
 import { applySecurity } from './security'
-import { createWindow, getMainWindow } from './window'
+import { applyWindowTheme, createWindow, getMainWindow } from './window'
 import { initTray, setQuitting, showMainWindow } from './tray'
 import { closeDb, getDb, openDb } from './db/connection'
 import { registerAllIpc } from './ipc'
@@ -48,6 +48,9 @@ if (!gotLock) {
 
     createWindow()
     initTray(getMainWindow)
+
+    // Режим «Системная тема»: заголовок окна перекрашивается вслед за Windows (04 §8).
+    nativeTheme.on('updated', applyWindowTheme)
 
     app.on('activate', () => {
       if (BrowserWindow.getAllWindows().length === 0) createWindow()

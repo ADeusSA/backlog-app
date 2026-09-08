@@ -4,7 +4,7 @@ import { I18nextProvider } from 'react-i18next'
 import { RouterProvider } from '@tanstack/react-router'
 import { bindQueryInvalidation } from '@/platform/events'
 import { bindSyncEvents, useSyncStore } from '@/stores/sync-store'
-import { useSettingsStore } from '@/stores/settings-store'
+import { useSettingsStore, watchTheme } from '@/stores/settings-store'
 import { useUiStore } from '@/stores/ui-store'
 import { initI18n, i18next } from '@/i18n'
 import { router } from './router'
@@ -34,10 +34,12 @@ export function AppProviders(): ReactNode {
     void boot()
     const unbindQueries = bindQueryInvalidation(queryClient)
     const unbindSync = bindSyncEvents()
+    const unbindTheme = watchTheme()
     return () => {
       cancelled = true
       unbindQueries()
       unbindSync()
+      unbindTheme()
     }
   }, [loadSettings])
 

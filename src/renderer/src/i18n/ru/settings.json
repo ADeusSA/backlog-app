@@ -20,7 +20,9 @@
   "settings.tray.startMinimized": "Запускать свёрнутым",
 
   "settings.theme": "Тема",
-  "settings.theme.hint": "В этой версии доступна только тёмная тема Aurora",
+  "settings.theme.hint": "Светлая и тёмная палитры Aurora; «Системная» следует настройке Windows",
+  "settings.theme.system": "Системная",
+  "settings.theme.light": "Светлая",
   "settings.theme.dark": "Тёмная",
   "settings.cardSize": "Размер карточек по умолчанию",
   "settings.density": "Плотность",
