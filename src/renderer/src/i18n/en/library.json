@@ -1,0 +1,6 @@
+{
+  "library.addGame": "Add game",
+  "library.addDemo": "Add sample data",
+  "library.demoAdded": "Games added: {{count}}",
+  "library.connectCloud": "Connect the cloud"
+}

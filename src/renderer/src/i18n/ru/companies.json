@@ -1,0 +1,13 @@
+{
+  "companies.new": "Добавить студию",
+  "companies.empty": "Компаний пока нет",
+  "companies.developers": "Разработчики",
+  "companies.publishers": "Издатели",
+  "companies.country": "Страна",
+  "companies.counts": "{{catalog}} в каталоге · {{mine}} у меня",
+  "companies.founded": "Основана {{year}}",
+  "companies.closed": "закрыта {{year}}",
+  "companies.partOf": "Часть: {{name}}",
+  "companies.children": "Дочерние компании",
+  "companies.seriesShare": "{{own}} из {{total}} игр серии"
+}

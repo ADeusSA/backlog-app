@@ -1,0 +1,17 @@
+{
+  "series.new": "Новая серия",
+  "series.empty": "Серий пока нет",
+  "series.sort.name": "Название",
+  "series.sort.games": "Игр",
+  "series.sort.latest": "Последняя",
+  "series.sort.progress": "Прогресс",
+  "series.completed": "пройдено {{count}}",
+  "series.addGame": "Добавить игру в серию",
+  "series.added": "Добавлено игр: {{count}}",
+  "series.autoNumber": "Автонумерация по дате выхода",
+  "series.autoNumbered": "Порядок пересчитан по дате выхода",
+  "series.showDlc": "Показывать DLC",
+  "series.position": "Номер",
+  "series.label": "Метка",
+  "search.title": "Результаты поиска"
+}

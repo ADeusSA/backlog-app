@@ -1,0 +1,17 @@
+{
+  "welcome.step1.title": "Where to store data",
+  "welcome.step1.text": "By default the database and images live next to the app — you can carry it on a USB stick.",
+  "welcome.step1.existing": "This folder already has a database from {{date}} — it will be used",
+  "welcome.step2.title": "What's your name",
+  "welcome.step2.name": "Profile name",
+  "welcome.step2.hint": "You can add an avatar later in your profile.",
+  "welcome.step3.title": "Sync",
+  "welcome.step3.text": "Your data will be stored in a Backlog folder on your Google Drive and synced between your computers.",
+  "welcome.step3.later": "Later, without the cloud",
+  "welcome.signedIn": "Google Drive connected",
+  "welcome.demo": "Add sample data (12 games, 3 studios, 2 series) — can be removed later",
+  "welcome.skip": "Skip",
+  "welcome.back": "Back",
+  "welcome.next": "Next",
+  "welcome.start": "Start"
+}

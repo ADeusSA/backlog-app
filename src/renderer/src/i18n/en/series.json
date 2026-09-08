@@ -1,0 +1,17 @@
+{
+  "series.new": "New series",
+  "series.empty": "No series yet",
+  "series.sort.name": "Name",
+  "series.sort.games": "Games",
+  "series.sort.latest": "Latest",
+  "series.sort.progress": "Progress",
+  "series.completed": "{{count}} completed",
+  "series.addGame": "Add a game to the series",
+  "series.added": "Games added: {{count}}",
+  "series.autoNumber": "Auto-number by release date",
+  "series.autoNumbered": "Order recalculated by release date",
+  "series.showDlc": "Show DLC",
+  "series.position": "Position",
+  "series.label": "Label",
+  "search.title": "Search results"
+}

@@ -1,0 +1,55 @@
+{
+  "lists.sort.order": "Как в сайдбаре",
+  "lists.sort.name": "По названию",
+  "lists.sort.updated": "По дате изменения",
+  "lists.sort.count": "По числу игр",
+
+  "lists.empty.description": "Соберите игры в тематическую подборку — например, «Уютные игры» или «Пройти в 2026»",
+
+  "lists.form.createTitle": "Новый список",
+  "lists.form.editTitle": "Редактирование списка",
+  "lists.form.name": "Название",
+  "lists.form.description": "Описание",
+  "lists.form.icon": "Иконка",
+  "lists.form.iconPick": "Выбрать иконку",
+  "lists.form.color": "Цвет",
+  "lists.form.cover": "Обложка",
+  "lists.form.coverHint": "Если обложка не выбрана — используется мозаика из первых 4 игр списка",
+  "lists.form.sortMode": "Режим сортировки",
+  "lists.form.ranked": "Ранжированный (показывать номера)",
+  "lists.form.pinned": "Закрепить в сайдбаре",
+  "lists.form.delete": "Удалить список",
+
+  "lists.sortMode.manual": "Ручной",
+  "lists.sortMode.title": "По названию",
+  "lists.sortMode.release_date": "По дате выхода",
+  "lists.sortMode.added_at": "По дате добавления",
+  "lists.sortMode.rating": "По оценке",
+
+  "lists.saved": "Список сохранён",
+  "lists.deleted": "Список «{{name}}» удалён",
+  "lists.duplicate": "Дублировать",
+  "lists.duplicated": "Список продублирован",
+  "lists.exportMarkdown": "Экспортировать в Markdown",
+
+  "lists.delete.title": "Удалить список «{{name}}»?",
+  "lists.delete.hint": "Игры останутся в библиотеке — удалится только сам список.",
+
+  "lists.addGames.title": "Добавить игры",
+  "lists.addGames.tabSearch": "Поиск",
+  "lists.addGames.tabFilter": "Из фильтра",
+  "lists.addGames.searchPlaceholder": "Название игры…",
+  "lists.addGames.already": "Уже в списке",
+  "lists.addGames.addN": "Добавить {{count}}",
+  "lists.addGames.added": "Добавлено {{count}} игр",
+  "lists.addGames.added_one": "Добавлена {{count}} игра",
+  "lists.addGames.added_few": "Добавлено {{count}} игры",
+  "lists.addGames.added_many": "Добавлено {{count}} игр",
+  "lists.addGames.added_other": "Добавлено {{count}} игр",
+  "lists.addGames.applyFilter": "Добавить все совпадения",
+  "lists.addGames.yearFrom": "Год от",
+  "lists.addGames.yearTo": "Год до",
+
+  "lists.item.note": "Заметка к позиции",
+  "lists.item.notePlaceholder": "Например: перепройти на харде"
+}

@@ -1,0 +1,53 @@
+{
+  "lists.sort.order": "Sidebar order",
+  "lists.sort.name": "By name",
+  "lists.sort.updated": "Last modified",
+  "lists.sort.count": "Game count",
+
+  "lists.empty.description": "Collect games into a themed set — like \"Cozy games\" or \"Beat in 2026\"",
+
+  "lists.form.createTitle": "New list",
+  "lists.form.editTitle": "Edit list",
+  "lists.form.name": "Name",
+  "lists.form.description": "Description",
+  "lists.form.icon": "Icon",
+  "lists.form.iconPick": "Choose icon",
+  "lists.form.color": "Color",
+  "lists.form.cover": "Cover",
+  "lists.form.coverHint": "If no cover is set, a mosaic of the first 4 games is used",
+  "lists.form.sortMode": "Sort mode",
+  "lists.form.ranked": "Ranked (show numbers)",
+  "lists.form.pinned": "Pin to sidebar",
+  "lists.form.delete": "Delete list",
+
+  "lists.sortMode.manual": "Manual",
+  "lists.sortMode.title": "By title",
+  "lists.sortMode.release_date": "By release date",
+  "lists.sortMode.added_at": "By date added",
+  "lists.sortMode.rating": "By rating",
+
+  "lists.saved": "List saved",
+  "lists.deleted": "List \"{{name}}\" deleted",
+  "lists.duplicate": "Duplicate",
+  "lists.duplicated": "List duplicated",
+  "lists.exportMarkdown": "Export to Markdown",
+
+  "lists.delete.title": "Delete list \"{{name}}\"?",
+  "lists.delete.hint": "Games stay in your library — only the list itself is removed.",
+
+  "lists.addGames.title": "Add games",
+  "lists.addGames.tabSearch": "Search",
+  "lists.addGames.tabFilter": "From filter",
+  "lists.addGames.searchPlaceholder": "Game title…",
+  "lists.addGames.already": "Already in list",
+  "lists.addGames.addN": "Add {{count}}",
+  "lists.addGames.added": "Added {{count}} games",
+  "lists.addGames.added_one": "Added {{count}} game",
+  "lists.addGames.added_other": "Added {{count}} games",
+  "lists.addGames.applyFilter": "Add all matches",
+  "lists.addGames.yearFrom": "Year from",
+  "lists.addGames.yearTo": "Year to",
+
+  "lists.item.note": "Position note",
+  "lists.item.notePlaceholder": "e.g. replay on hard mode"
+}

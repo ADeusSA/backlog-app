@@ -1,0 +1,13 @@
+{
+  "companies.new": "Add studio",
+  "companies.empty": "No companies yet",
+  "companies.developers": "Developers",
+  "companies.publishers": "Publishers",
+  "companies.country": "Country",
+  "companies.counts": "{{catalog}} in catalog · {{mine}} mine",
+  "companies.founded": "Founded {{year}}",
+  "companies.closed": "closed {{year}}",
+  "companies.partOf": "Part of: {{name}}",
+  "companies.children": "Subsidiaries",
+  "companies.seriesShare": "{{own}} of {{total}} games in the series"
+}

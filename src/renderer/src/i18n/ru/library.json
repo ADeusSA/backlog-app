@@ -1,0 +1,6 @@
+{
+  "library.addGame": "Добавить игру",
+  "library.addDemo": "Добавить примерные данные",
+  "library.demoAdded": "Добавлено игр: {{count}}",
+  "library.connectCloud": "Подключить облако"
+}

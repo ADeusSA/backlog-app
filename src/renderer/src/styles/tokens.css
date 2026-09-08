@@ -1,0 +1,161 @@
+/**
+ * Дизайн-система «Aurora» — токены (ТЗ 04 §2).
+ * Единственный источник цветов, радиусов, теней и длительностей.
+ * Компоненты не имеют права использовать литеральные цвета.
+ */
+
+:root {
+  color-scheme: dark;
+
+  /* 2.1 Поверхности и текст */
+  --bg-0: #0b0d14;
+  --bg-1: #10131c;
+  --surface-1: rgba(255, 255, 255, 0.045);
+  --surface-2: rgba(255, 255, 255, 0.07);
+  --surface-glass: rgba(18, 21, 32, 0.62);
+  /**
+   * Плотное стекло для всплывающих слоёв (меню, поповеры, диалоги, выпадающие списки).
+   * ТЗ 04 §2.1 задаёт 0.62, но на такой прозрачности сквозь меню просвечивает контент
+   * и текст не читается — по требованию пользователя поднято до 0.88 (см. ADR 0005).
+   */
+  --surface-glass-strong: rgba(18, 21, 32, 0.88);
+  --surface-solid: #151925;
+  --border-1: rgba(255, 255, 255, 0.08);
+  --border-2: rgba(255, 255, 255, 0.14);
+  --text-1: #f2f4fa;
+  --text-2: #9aa3b8;
+  --text-3: #6b7386;
+  --text-disabled: #4b5163;
+  --overlay: rgba(6, 8, 14, 0.6);
+
+  /* 2.2 Роли */
+  --accent: #8b7cff;
+  --accent-hover: #9d90ff;
+  --accent-press: #7a6beb;
+  --accent-on: #15103a;
+  --accent-soft: rgba(139, 124, 255, 0.16);
+  --success: #34d6c4;
+  --success-on: #043d36;
+  --success-soft: rgba(52, 214, 196, 0.16);
+  --warning: #e8b85a;
+  --warning-on: #3d2a05;
+  --danger: #f0708a;
+  --danger-on: #3d0a14;
+  --danger-soft: rgba(240, 112, 138, 0.12);
+  --info: var(--accent);
+  --primary-btn: #f2f4fa;
+  --primary-btn-on: #0b0d14;
+  --border-focus: var(--accent);
+
+  /* 2.3 Статусы */
+  --st-wishlist: #c9a7f5;
+  --st-backlog: #8fa0c0;
+  --st-playing: #8b7cff;
+  --st-completed: #34d6c4;
+  --st-shelved: #e8b85a;
+  --st-dropped: #f0708a;
+  --st-played: #6fb4e8;
+
+  --st-wishlist-on: #2a1740;
+  --st-backlog-on: #12182a;
+  --st-playing-on: #15103a;
+  --st-completed-on: #043d36;
+  --st-shelved-on: #3d2a05;
+  --st-dropped-on: #3d0a14;
+  --st-played-on: #05283f;
+
+  /* Затемнения поверх обложек: бейджи, подписи, градиент hero (04 §3.5, §4) */
+  --scrim: rgba(6, 8, 14, 0.55);
+  --scrim-gradient: linear-gradient(0deg, rgba(6, 8, 14, 0.75), transparent);
+  --hero-scrim: linear-gradient(180deg, rgba(11, 13, 20, 0.2), var(--bg-0) 100%);
+  --cover-text-shadow: 0 1px 6px rgba(0, 0, 0, 0.7);
+  --accent-border: color-mix(in srgb, var(--accent) 50%, transparent);
+
+  /* Треки колец, баров и слайдеров (04 §3.7, §3.13) и служебные полупрозрачные слои */
+  --track: color-mix(in srgb, var(--text-1) 10%, transparent);
+  --scrollbar-thumb: color-mix(in srgb, var(--text-1) 18%, transparent);
+  --scrollbar-thumb-hover: color-mix(in srgb, var(--text-1) 30%, transparent);
+  --shimmer: color-mix(in srgb, var(--text-1) 8%, transparent);
+
+  /* Metacritic (04 §2.3) — единственное место с зелёным */
+  --mc-good: #5dca5d;
+  --mc-mixed: #e8b85a;
+  --mc-bad: #f0708a;
+
+  /* 2.4 Свечения */
+  --bloom-a: #4b3bc7;
+  --bloom-b: #0f7c6e;
+  --bloom-opacity: 0.32;
+  --bloom-blur: 80px;
+
+  /* 2.5 Типографика */
+  --font-sans: 'Manrope', 'Segoe UI Variable Text', 'Segoe UI', system-ui, sans-serif;
+  --font-mono: 'Cascadia Code', Consolas, 'Courier New', monospace;
+
+  /* 2.6 Радиусы */
+  --r-xs: 6px;
+  --r-sm: 10px;
+  --r-md: 14px;
+  --r-lg: 18px;
+  --r-xl: 24px;
+  --r-pill: 999px;
+
+  /* 2.6 Каркас */
+  --h-titlebar: 44px;
+  --w-rail: 72px;
+  --w-sidebar: 240px;
+  --w-filters: 320px;
+  --pad-content: 24px;
+  --gap-grid: 14px;
+  --gap-panels: 16px;
+
+  /* Высоты контролов */
+  --h-compact: 32px;
+  --h-control: 36px;
+  --h-large: 44px;
+
+  /* 2.7 Тени */
+  --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.35);
+  --shadow-2: 0 12px 28px rgba(0, 0, 0, 0.45);
+  --shadow-3: 0 24px 60px rgba(0, 0, 0, 0.55);
+  --ring-accent: 0 0 0 1px rgba(139, 124, 255, 0.55);
+
+  /* §5 Словарь движения */
+  --ease-standard: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --ease-emphasized: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --d-micro: 120ms;
+  --d-hover: 180ms;
+  --d-enter: 240ms;
+  --d-page: 400ms;
+  --d-ring: 900ms;
+  --d-bloom: 600ms;
+  --d-drift: 20s;
+}
+
+/* «Анимации: уменьшенные» — 04 §5 */
+:root[data-motion='reduced'] {
+  --d-page: 200ms;
+  --d-ring: 400ms;
+  --d-bloom: 300ms;
+}
+
+/* «Анимации: выключены» и системный prefers-reduced-motion */
+:root[data-motion='off'] {
+  --d-micro: 80ms;
+  --d-hover: 0ms;
+  --d-enter: 0ms;
+  --d-page: 0ms;
+  --d-ring: 0ms;
+  --d-bloom: 0ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root:not([data-motion='full']) {
+    --d-micro: 80ms;
+    --d-hover: 0ms;
+    --d-enter: 0ms;
+    --d-page: 0ms;
+    --d-ring: 0ms;
+    --d-bloom: 0ms;
+  }
+}
