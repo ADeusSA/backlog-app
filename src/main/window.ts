@@ -3,6 +3,7 @@ import path from 'node:path'
 import { writeFileSync } from 'node:fs'
 import { getSettings, patchSettings } from './services/settings.service'
 import { hardenWindow } from './security'
+import { shouldHideOnClose, shouldStartHidden } from './tray'
 import { log } from './log'
 
 const BG = '#0B0D14'
@@ -56,7 +57,10 @@ export function createWindow(): BrowserWindow {
     })
   }
 
-  win.on('ready-to-show', () => win.show())
+  // «Запускать свёрнутым в трей» (06 §8): окно создаётся, но не показывается.
+  win.on('ready-to-show', () => {
+    if (!shouldStartHidden()) win.show()
+  })
 
   // Dev-хук для проверки вида без ручного скриншота: `npx electron . --capture=out.png[:задержка_мс]`.
   const captureArg = process.argv.find((arg) => arg.startsWith('--capture='))
@@ -92,7 +96,14 @@ export function createWindow(): BrowserWindow {
   win.on('move', scheduleSave)
   win.on('maximize', scheduleSave)
   win.on('unmaximize', scheduleSave)
-  win.on('close', saveBounds)
+  win.on('close', (event) => {
+    saveBounds()
+    // С включённым треем крестик прячет окно, а не завершает приложение (06 §8).
+    if (shouldHideOnClose()) {
+      event.preventDefault()
+      win.hide()
+    }
+  })
 
   win.webContents.setWindowOpenHandler(({ url }) => {
     void shell.openExternal(url)

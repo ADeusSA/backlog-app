@@ -14,6 +14,10 @@
   "settings.moveDataDir.confirm": "The database, images and backups will be copied to “{{dir}}”, then the app will restart. The old folder stays where it is — delete it manually once you have checked everything is there.",
   "settings.showAchievements": "Show achievements and level",
   "settings.showAchievements.hint": "Turns gamification off completely",
+  "settings.tray": "Notification area icon",
+  "settings.tray.hint": "Menu by the clock: open, sync, quit",
+  "settings.tray.minimizeOnClose": "Minimise to tray when the window is closed",
+  "settings.tray.startMinimized": "Start minimised",
 
   "settings.theme": "Theme",
   "settings.theme.hint": "This version ships the dark Aurora theme only",

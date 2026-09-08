@@ -10,6 +10,10 @@ asar: true
 asarUnpack:
   - '**/*.node'
 npmRebuild: false
+# Значок трея читается в рантайме из resources/ рядом с app.asar (src/main/tray.ts).
+extraResources:
+  - from: resources/icon.png
+    to: icon.png
 afterPack: scripts/after-pack.cjs
 win:
   target:

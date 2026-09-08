@@ -34,6 +34,7 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
       window: { ...current.window, ...(patch.window ?? {}) },
       sync: { ...current.sync, ...(patch.sync ?? {}) },
       backups: { ...current.backups, ...(patch.backups ?? {}) },
+      tray: { ...current.tray, ...(patch.tray ?? {}) },
       viewByScope: { ...current.viewByScope, ...(patch.viewByScope ?? {}) },
       filterPanelByScope: { ...current.filterPanelByScope, ...(patch.filterPanelByScope ?? {}) }
     }

@@ -47,6 +47,15 @@ export const settingsSchema = z.object({
   backups: z
     .object({ keep: z.number().int().min(1).max(50).default(10), daily: z.boolean().default(true) })
     .default({ keep: 10, daily: true }),
+  /** Значок в области уведомлений и запуск свёрнутым (06 §8, итерация 2). */
+  tray: z
+    .object({
+      enabled: z.boolean().default(false),
+      /** Крестик прячет окно в трей вместо выхода. */
+      minimizeOnClose: z.boolean().default(true),
+      startMinimized: z.boolean().default(false)
+    })
+    .default({ enabled: false, minimizeOnClose: true, startMinimized: false }),
   onboardingDone: z.boolean().default(false),
   /**
    * Недавно открытые сущности командной палитры (05 §6) — до 8, самая свежая первая.

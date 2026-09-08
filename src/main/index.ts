@@ -3,6 +3,7 @@ import { resolvePaths } from './paths'
 import { registerImageScheme, handleImageProtocol } from './protocol'
 import { applySecurity } from './security'
 import { createWindow, getMainWindow } from './window'
+import { initTray, setQuitting, showMainWindow } from './tray'
 import { closeDb, getDb, openDb } from './db/connection'
 import { registerAllIpc } from './ipc'
 import { initLog, log } from './log'
@@ -19,13 +20,8 @@ const gotLock = app.requestSingleInstanceLock()
 if (!gotLock) {
   app.quit()
 } else {
-  app.on('second-instance', () => {
-    const win = getMainWindow()
-    if (win) {
-      if (win.isMinimized()) win.restore()
-      win.focus()
-    }
-  })
+  // Вторая копия поднимает первую — в том числе спрятанную в трей.
+  app.on('second-instance', showMainWindow)
 
   app.whenReady().then(() => {
     applySecurity()
@@ -51,6 +47,7 @@ if (!gotLock) {
     }
 
     createWindow()
+    initTray(getMainWindow)
 
     app.on('activate', () => {
       if (BrowserWindow.getAllWindows().length === 0) createWindow()
@@ -64,6 +61,8 @@ if (!gotLock) {
   // Перед закрытием базы ждём (≤ 30 с) завершения отложенной выгрузки в облако (03 §7; 05 §1) —
   // иначе push мог бы упасть на закрытом соединении. flushBeforeQuit() идемпотентна.
   app.on('before-quit', (event) => {
+    // С этого момента закрытие окна больше не прячет его в трей.
+    setQuitting(true)
     if (isQuitFlushDone()) {
       closeDb()
       return

@@ -14,6 +14,10 @@
   "settings.moveDataDir.confirm": "База, изображения и копии будут скопированы в «{{dir}}», после чего приложение перезапустится. Старая папка останется на месте — удалите её вручную, когда убедитесь, что всё на месте.",
   "settings.showAchievements": "Показывать достижения и уровень",
   "settings.showAchievements.hint": "Отключает геймификацию целиком",
+  "settings.tray": "Значок в области уведомлений",
+  "settings.tray.hint": "Меню у часов: открыть, синхронизировать, выйти",
+  "settings.tray.minimizeOnClose": "Сворачивать в трей при закрытии окна",
+  "settings.tray.startMinimized": "Запускать свёрнутым",
 
   "settings.theme": "Тема",
   "settings.theme.hint": "В этой версии доступна только тёмная тема Aurora",

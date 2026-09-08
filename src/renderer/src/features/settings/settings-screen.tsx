@@ -202,6 +202,27 @@ function GeneralSection(): React.ReactElement {
           onChange={(showAchievements) => void patch({ showAchievements })}
         />
       </Row>
+      <Separator />
+      <Row title={t('settings.tray')} description={t('settings.tray.hint')}>
+        <Switch
+          checked={settings.tray.enabled}
+          onChange={(enabled) => void patch({ tray: { ...settings.tray, enabled } })}
+        />
+      </Row>
+      <Row title={t('settings.tray.minimizeOnClose')}>
+        <Switch
+          checked={settings.tray.minimizeOnClose}
+          disabled={!settings.tray.enabled}
+          onChange={(minimizeOnClose) => void patch({ tray: { ...settings.tray, minimizeOnClose } })}
+        />
+      </Row>
+      <Row title={t('settings.tray.startMinimized')}>
+        <Switch
+          checked={settings.tray.startMinimized}
+          disabled={!settings.tray.enabled}
+          onChange={(startMinimized) => void patch({ tray: { ...settings.tray, startMinimized } })}
+        />
+      </Row>
     </section>
   )
 }

@@ -2,6 +2,7 @@ import { app, dialog } from 'electron'
 import { handle } from './register'
 import { getSettings, patchSettings } from '../services/settings.service'
 import { moveDataDir } from '../services/data-dir.service'
+import { applyTraySettings } from '../tray'
 import { getMainWindow, setTitleBarTheme } from '../window'
 
 export function registerSettingsIpc(): void {
@@ -9,6 +10,7 @@ export function registerSettingsIpc(): void {
 
   handle('settings.patch', (patch) => {
     const next = patchSettings(patch)
+    if (patch.tray || patch.locale) applyTraySettings()
     if (patch.theme) {
       setTitleBarTheme(next.theme === 'light' ? '#F3F4F8' : '#0B0D14', next.theme === 'light' ? '#4B5163' : '#9AA3B8')
     }
