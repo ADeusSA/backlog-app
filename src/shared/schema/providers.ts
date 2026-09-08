@@ -96,12 +96,20 @@ export type CanonicalGame = z.infer<typeof canonicalGameSchema>
 /** Готовность провайдера к работе — для панели импорта и раздела настроек. */
 export const providerStatusSchema = z.object({
   provider: importProviderSchema,
-  /** Нужны ли ключи вообще (Steam — нет). */
+  /**
+   * Просит ли источник ключи у пользователя. Steam не просит вовсе, RAWG получает
+   * ключ приложения при сборке (`.env`), и только IGDB требует ключи от каждого.
+   */
   needsCredentials: z.boolean(),
   hasCredentials: z.boolean(),
   ready: z.boolean(),
-  /** Код причины для i18n: `noCredentials` | `noEncryption` | `ok`. */
-  reason: z.enum(['ok', 'noCredentials', 'noEncryption'])
+  /**
+   * Код причины для i18n:
+   * `ok` — работает; `noCredentials` — пользователь не ввёл ключи;
+   * `noEncryption` — недоступно защищённое хранилище ОС;
+   * `notBundled` — ключ не вшит в эту сборку (пустой `.env` при сборке).
+   */
+  reason: z.enum(['ok', 'noCredentials', 'noEncryption', 'notBundled'])
 })
 export type ProviderStatus = z.infer<typeof providerStatusSchema>
 

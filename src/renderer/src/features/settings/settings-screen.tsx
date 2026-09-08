@@ -407,18 +407,26 @@ function SourcesSection(): React.ReactElement {
         tone="success"
       />
 
-      {/* RAWG — рабочая замена IGDB: ключ выдаётся сразу после регистрации по почте,
-          телефон и двухфакторная аутентификация не нужны. */}
-      <KeyedProviderCard
-        provider="rawg"
+      {/*
+        У RAWG ключ вшит в сборку (`.env` → src/main/providers/rawg.config.ts), поэтому
+        полей для ввода здесь нет: приложение раздаётся уже готовым к работе.
+      */}
+      <ProviderCard
         name="RAWG"
         description={t('settings.sources.rawgDesc')}
-        status={statusOf('rawg')}
-        steps={['settings.sources.rawg.step1', 'settings.sources.rawg.step2']}
-        signupUrl="https://rawg.io/apidocs"
-        signupLabel={t('settings.sources.openRawg')}
-        secondField={false}
-      />
+        state={
+          statusOf('rawg')?.ready
+            ? t('settings.sources.bundledKey')
+            : t('settings.sources.noBundledKey')
+        }
+        tone={statusOf('rawg')?.ready ? 'success' : 'warning'}
+      >
+        {!statusOf('rawg')?.ready && (
+          <p className="type-small" style={{ color: 'var(--text-2)' }}>
+            {t('settings.sources.noBundledKeyHint')}
+          </p>
+        )}
+      </ProviderCard>
 
       <KeyedProviderCard
         provider="igdb"

@@ -11,6 +11,7 @@ import * as steam from './steam'
 import * as igdb from './igdb'
 import * as rawg from './rawg'
 import { getCredentials, isEncryptionAvailable } from './credentials'
+import { isRawgConfigured } from './rawg.config'
 
 interface Provider {
   needsCredentials: boolean
@@ -33,13 +34,25 @@ function isReady(provider: ImportProvider): boolean {
 export function statuses(): ProviderStatus[] {
   const encryption = isEncryptionAvailable()
   return IMPORT_PROVIDERS.map((provider) => {
-    const spec = REGISTRY[provider]
-    if (!spec.needsCredentials) {
+    if (provider === 'steam') {
       return { provider, needsCredentials: false, hasCredentials: false, ready: true, reason: 'ok' as const }
     }
+
+    if (provider === 'rawg') {
+      // Ключ приходит из сборки (`.env`), у пользователя ничего не спрашиваем.
+      const hasKey = isRawgConfigured() || Boolean(getCredentials('rawg')?.clientId)
+      return {
+        provider,
+        needsCredentials: false,
+        hasCredentials: hasKey,
+        ready: hasKey,
+        reason: hasKey ? ('ok' as const) : ('notBundled' as const)
+      }
+    }
+
     // У IGDB ключей два: с одним Client ID токен не получить.
     const creds = getCredentials(provider)
-    const hasCredentials = Boolean(creds?.clientId) && (provider !== 'igdb' || Boolean(creds?.clientSecret))
+    const hasCredentials = Boolean(creds?.clientId) && Boolean(creds?.clientSecret)
     const reason = !encryption ? ('noEncryption' as const) : hasCredentials ? ('ok' as const) : ('noCredentials' as const)
     return { provider, needsCredentials: true, hasCredentials, ready: reason === 'ok', reason }
   })

@@ -121,14 +121,19 @@ export function ImportPanel({ title, onPick, loading }: Props): ReactElement {
           <KeyRound size={13} strokeWidth={1.75} />
           {status?.reason === 'noEncryption'
             ? t('catalog.import.noEncryption')
-            : t('catalog.import.needKeys', { provider: PROVIDER_LABEL[provider] })}
-          <button
-            type="button"
-            className="underline"
-            onClick={() => void navigate({ to: '/settings/$section', params: { section: 'sources' } })}
-          >
-            {t('catalog.import.openSettings')}
-          </button>
+            : status?.reason === 'notBundled'
+              ? t('catalog.import.noBundledKey', { provider: PROVIDER_LABEL[provider] })
+              : t('catalog.import.needKeys', { provider: PROVIDER_LABEL[provider] })}
+          {/* Ссылка в настройки имеет смысл только там, где ключи вводит пользователь. */}
+          {status?.reason !== 'notBundled' && (
+            <button
+              type="button"
+              className="underline"
+              onClick={() => void navigate({ to: '/settings/$section', params: { section: 'sources' } })}
+            >
+              {t('catalog.import.openSettings')}
+            </button>
+          )}
         </p>
       )}
 

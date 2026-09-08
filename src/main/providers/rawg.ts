@@ -21,6 +21,7 @@ import { cached } from './cache'
 import { httpJson } from './http'
 import { acquire } from './rate-limit'
 import { getCredentials } from './credentials'
+import { bundledRawgKey } from './rawg.config'
 import { uiLanguage } from './locale'
 import { asRef, mapGenre, mapMode, mapPlatform, uniqueRefs } from './taxonomy-map'
 
@@ -29,6 +30,18 @@ const API = 'https://api.rawg.io/api'
 
 /** Сколько тегов берём: у RAWG их бывает под сотню, и все они в каталог не нужны. */
 const MAX_TAGS = 8
+
+/**
+ * Теги RAWG — это пользовательские теги Steam, и среди них половина описывает не игру,
+ * а возможности витрины: «Steam Achievements», «Full controller support», «Steam Cloud».
+ * В каталоге тегов им не место, поэтому отсеиваем по характерным словам в slug.
+ */
+const TECHNICAL_TAG_PATTERN =
+  /^(steam-|remote-play|cross-platform|controller$)|achievements|trading-cards|controller-support|steam-cloud|workshop|leaderboards|captions|level-editor|in-app-purchases|vr-support|commentary|stats$|includes-source-sdk|valve-anti-cheat/
+
+export function isTechnicalTag(slug: string | undefined): boolean {
+  return TECHNICAL_TAG_PATTERN.test((slug ?? '').toLowerCase())
+}
 
 /* ----------------------------------------------------------------- ответы API */
 
@@ -71,12 +84,22 @@ interface RawgSearchResponse {
 
 /* ------------------------------------------------------------------- запросы */
 
+/**
+ * Ключ приложения: вшит в сборку через `.env` (см. rawg.config.ts), чтобы у тех, кому
+ * отдали готовый архив, всё работало без регистрации. Ключ из защищённого хранилища
+ * имеет приоритет — это запасной путь на случай, если общий ключ залимитили и кто-то
+ * захочет подставить свой (канал `providers.setCredentials` для этого остался).
+ */
 function apiKey(): string {
-  const creds = getCredentials('rawg')
-  if (!creds?.clientId) {
-    throw new AppError('sync_auth', 'Не задан ключ RAWG — укажите его в «Настройки → Источники данных»')
+  const stored = getCredentials('rawg')?.clientId?.trim()
+  const key = stored || bundledRawgKey()
+  if (!key) {
+    throw new AppError(
+      'sync_auth',
+      'В этой сборке нет ключа RAWG. Ключ задаётся при сборке в файле .env (MAIN_VITE_RAWG_KEY).'
+    )
   }
-  return creds.clientId
+  return key
 }
 
 async function get<T>(path: string, params: Record<string, string> = {}): Promise<T> {
@@ -108,12 +131,31 @@ export function mapDate(
  * Короткое описание RAWG не отдаёт — берём первый абзац полного,
  * чтобы «Аннотация» не осталась пустой, а остальное кладём в «Сюжет».
  */
+/**
+ * Предел поля «Аннотация» из схемы (`gameInputSchema.summary`). Держим именно его:
+ * у RAWG описание часто идёт одним абзацем на 700–1500 символов, и при меньшем пороге
+ * оно уезжало и в аннотацию, и в «Сюжет» — в диалоге импорта это выглядело дублем.
+ */
+const SUMMARY_LIMIT = 4000
+
 export function splitDescription(raw: string | undefined): { summary: string | null; storyline: string | null } {
-  const text = (raw ?? '').trim()
+  // RAWG разделяет абзацы парой CRLF: без нормализации `\n{2,}` не совпадает,
+  // и весь текст уезжал в оба поля целиком.
+  const text = (raw ?? '').replace(/\r\n?/g, '\n').trim()
   if (!text) return { summary: null, storyline: null }
-  const [first = ''] = text.split(/\n{2,}/)
-  const summary = first.trim().slice(0, 600)
-  return { summary: summary || null, storyline: text }
+
+  const paragraphs = text.split(/\n{2,}/)
+  const first = (paragraphs[0] ?? '').trim()
+  const rest = paragraphs.slice(1).join('\n\n').trim()
+
+  // Аннотация — первый абзац, «Сюжет» — то, что после него: класть в оба поля один
+  // и тот же текст незачем, в диалоге импорта это выглядело как две одинаковые строки.
+  // Исключение — очень длинный первый абзац: его приходится обрезать, и тогда полный
+  // текст уходит в «Сюжет», чтобы ничего не потерялось.
+  const summary = first.slice(0, SUMMARY_LIMIT)
+  const storyline = first.length > SUMMARY_LIMIT ? text : rest || null
+
+  return { summary: summary || null, storyline }
 }
 
 /**
@@ -127,9 +169,12 @@ export function splitTags(tags: RawgTag[] | undefined, language: 'eng' | 'rus'):
   const modes = uniqueRefs(all.map((tag) => (tag.slug ? mapMode(tag.slug) : null)))
   const modeSlugs = new Set(all.filter((tag) => tag.slug && mapMode(tag.slug)).map((tag) => tag.slug))
 
-  const wanted = all.filter((tag) => tag.language === language && tag.name && !modeSlugs.has(tag.slug))
+  const usable = (tag: RawgTag): boolean =>
+    Boolean(tag.name) && !modeSlugs.has(tag.slug) && !isTechnicalTag(tag.slug)
+
+  const wanted = all.filter((tag) => tag.language === language && usable(tag))
   // Если тегов на языке интерфейса нет, показываем английские — лучше, чем ничего.
-  const source = wanted.length > 0 ? wanted : all.filter((tag) => tag.name && !modeSlugs.has(tag.slug))
+  const source = wanted.length > 0 ? wanted : all.filter(usable)
 
   const picked = source
     .slice()

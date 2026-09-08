@@ -27,6 +27,7 @@
   "catalog.import.hint.igdb": "Можно вставить ссылку igdb.com/games/… . IGDB даёт время прохождения (сюжет / с побочными / на 100 %), серию, режимы и темы.",
   "catalog.import.needQuery": "Введите название или ссылку",
   "catalog.import.needKeys": "Для {{provider}} нужны ключи",
+  "catalog.import.noBundledKey": "В этой сборке нет ключа {{provider}}",
   "catalog.import.noEncryption": "Защищённое хранилище Windows недоступно — ключи негде сохранить",
   "catalog.import.openSettings": "Открыть настройки",
   "catalog.import.noResults": "Ничего не нашлось",

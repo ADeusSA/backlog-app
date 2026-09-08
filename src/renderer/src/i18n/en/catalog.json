@@ -27,6 +27,7 @@
   "catalog.import.hint.igdb": "Paste an igdb.com/games/… link. IGDB provides time to beat (main / with extras / 100 %), series, modes and themes.",
   "catalog.import.needQuery": "Enter a title or a link",
   "catalog.import.needKeys": "{{provider}} needs API keys",
+  "catalog.import.noBundledKey": "This build has no {{provider}} key",
   "catalog.import.noEncryption": "Windows secure storage is unavailable — there is nowhere safe to keep the keys",
   "catalog.import.openSettings": "Open settings",
   "catalog.import.noResults": "Nothing found",

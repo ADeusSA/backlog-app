@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest'
-import { mapDate, parseRawgRef, splitDescription, splitTags, toCanonical } from '../../src/main/providers/rawg'
+import {
+  isTechnicalTag,
+  mapDate,
+  parseRawgRef,
+  splitDescription,
+  splitTags,
+  toCanonical
+} from '../../src/main/providers/rawg'
 
 /**
  * RAWG — источник для тех, кому недоступно приложение Twitch (оно требует
@@ -27,6 +34,7 @@ const WITCHER = {
   ],
   tags: [
     { name: 'Singleplayer', slug: 'singleplayer', language: 'eng', games_count: 200000 },
+    { name: 'Steam Achievements', slug: 'steam-achievements', language: 'eng', games_count: 150000 },
     { name: 'Atmospheric', slug: 'atmospheric', language: 'eng', games_count: 30000 },
     { name: 'Open World', slug: 'open-world', language: 'eng', games_count: 12000 },
     { name: 'Атмосферная', slug: 'atmosfernaia', language: 'rus', games_count: 9000 },
@@ -57,14 +65,70 @@ describe('mapDate', () => {
 })
 
 describe('splitDescription', () => {
-  it('первый абзац идёт в аннотацию, полный текст — в сюжет', () => {
-    const { summary, storyline } = splitDescription('Первый абзац.\n\nВторой абзац.')
+  it('первый абзац идёт в аннотацию, остальные — в сюжет, без дублирования', () => {
+    const { summary, storyline } = splitDescription('Первый абзац.\n\nВторой абзац.\n\nТретий.')
     expect(summary).toBe('Первый абзац.')
-    expect(storyline).toBe('Первый абзац.\n\nВторой абзац.')
+    expect(storyline).toBe('Второй абзац.\n\nТретий.')
   })
 
   it('пустое описание не создаёт пустых строк', () => {
     expect(splitDescription(undefined)).toEqual({ summary: null, storyline: null })
+  })
+
+  it('описание в один абзац не дублируется в «Сюжет»', () => {
+    expect(splitDescription('Один абзац и всё.')).toEqual({
+      summary: 'Один абзац и всё.',
+      storyline: null
+    })
+  })
+
+  it('разбирает абзацы, разделённые CRLF — именно так их отдаёт RAWG', () => {
+    // Регрессия: `\n{2,}` не совпадал с «\r\n\r\n», и весь текст попадал в оба поля.
+    const { summary, storyline } = splitDescription('Первый абзац.\r\n\r\nВторой абзац.')
+    expect(summary).toBe('Первый абзац.')
+    expect(storyline).toBe('Второй абзац.')
+  })
+
+  it('длинное описание одним абзацем целиком уходит в аннотацию, без дубля в «Сюжете»', () => {
+    // Регрессия: у Celeste это 812 символов одним абзацем, и при пороге 600
+    // текст попадал сразу в оба поля.
+    const long = 'a'.repeat(812)
+    const { summary, storyline } = splitDescription(long)
+    expect(summary).toBe(long)
+    expect(storyline).toBeNull()
+  })
+
+  it('абзац длиннее лимита схемы обрезается, но целиком остаётся в «Сюжете»', () => {
+    const huge = 'a'.repeat(4500)
+    const { summary, storyline } = splitDescription(huge)
+    expect(summary).toHaveLength(4000)
+    expect(storyline).toBe(huge)
+  })
+})
+
+describe('isTechnicalTag', () => {
+  it('отсеивает возможности витрины Steam', () => {
+    for (const slug of [
+      'steam-achievements',
+      'steam-cloud',
+      'steam-trading-cards',
+      'full-controller-support',
+      'partial-controller-support',
+      'remote-play-together',
+      'captions-available',
+      'includes-level-editor',
+      'cross-platform-multiplayer',
+      'controller',
+      'stats'
+    ]) {
+      expect(isTechnicalTag(slug), slug).toBe(true)
+    }
+  })
+
+  it('оставляет теги, которые описывают саму игру', () => {
+    for (const slug of ['2d', 'atmospheric', 'exploration', 'story-rich', 'cute', 'pixel-graphics']) {
+      expect(isTechnicalTag(slug), slug).toBe(false)
+    }
   })
 })
 
@@ -73,6 +137,11 @@ describe('splitTags', () => {
     const { modes, tags } = splitTags(WITCHER.tags, 'eng')
     expect(modes.map((m) => m.slug)).toEqual(['single-player'])
     expect(tags.map((t) => t.name)).not.toContain('Singleplayer')
+  })
+
+  it('технические теги витрины в каталог не попадают', () => {
+    const { tags } = splitTags(WITCHER.tags, 'eng')
+    expect(tags.map((t) => t.name)).toEqual(['Atmospheric', 'Open World'])
   })
 
   it('при русском интерфейсе берутся русские теги', () => {

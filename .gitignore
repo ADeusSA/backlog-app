@@ -2,6 +2,10 @@ node_modules/
 out/
 dist/
 data/
+# Ключи источников, вшиваемые в сборку (см. src/main/providers/rawg.config.ts).
+# Шаблон лежит в .env.example — сам .env в репозиторий не попадает.
+.env
+.env.local
 *.log
 .vite/
 .eslintcache

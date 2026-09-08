@@ -45,8 +45,15 @@ pressing "Search", or opening one search result.
 | Source | Access | What it provides |
 |---|---|---|
 | [Steam Store API](https://store.steampowered.com/api/appdetails) | no key required | title, description, developer/publisher, genres, modes, platforms, release date, age rating, Metacritic score, cover / hero art / logo |
-| [RAWG.io](https://rawg.io/apidocs) | the user's own API key, entered in the app | approximate time to beat, Metacritic score, studios, genres, tags, platforms, background art |
+| [RAWG.io](https://rawg.io/apidocs) | one application key, set at build time | approximate time to beat, Metacritic score, studios, genres, tags, platforms, background art |
 | [IGDB](https://api-docs.igdb.com/) | the user's own Twitch application credentials | time to beat (main / extras / 100 %), series, modes, themes, alternative titles, cover |
+
+The RAWG key is an **application key**, not a per-user one: the author sets it once in a
+`.env` file at build time (see [`.env.example`](.env.example) and
+[`rawg.config.ts`](src/main/providers/rawg.config.ts)), and the handful of people who get the
+built archive use the app without registering anywhere. `.env` is git-ignored, so the key is
+not in this repository. If it is left empty, RAWG simply shows up as an unconfigured source
+and the rest of the app keeps working.
 
 **Attribution is displayed inside the app**, as required by the RAWG free tier:
 
@@ -57,10 +64,11 @@ pressing "Search", or opening one search result.
 
 ![Data sources](docs/screenshots/data-sources.png)
 
-**Keys** are entered by each user for their own account. They are encrypted with the Windows
-data protection API (`safeStorage` / DPAPI) and stored in `data/providers/credentials.bin`.
-They never enter the database, the exported archive, the logs, or the renderer process — and
-they are obviously not in this repository. There is no shared or embedded key anywhere in the code.
+**Keys never leave the main process.** They are not written to the database, the exported
+archive or the logs, and the renderer cannot reach them: it runs with `connect-src 'none'`
+and has no network access at all. IGDB credentials, which are entered per user, are encrypted
+with the Windows data protection API (`safeStorage` / DPAPI) and stored in
+`data/providers/credentials.bin`. No key of any kind is committed to this repository.
 
 **Scraping is not used anywhere.** HowLongToBeat, Metacritic and SteamDB have no public API and
 their terms forbid scraping, so the app does not touch them: the completion-time estimate comes
@@ -119,6 +127,7 @@ Architecture notes:
 
 ```bash
 npm install
+cp .env.example .env   # optional: put your own RAWG key in it
 npm run dev
 ```
 
