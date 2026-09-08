@@ -12,6 +12,7 @@
   "profile.rings.mastered": "100 % от пройденных",
   "profile.rings.yearGoal": "Цель {{year}} года",
   "profile.rings.setGoal": "Задайте цель",
+  "profile.recapLink": "Итоги {{year}} года",
   "profile.rings.thisYear": "В этом году: {{count}}",
 
   "profile.nowPlaying.title": "Сейчас играю",

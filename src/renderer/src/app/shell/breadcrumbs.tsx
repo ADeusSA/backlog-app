@@ -132,6 +132,12 @@ export function Breadcrumbs(): React.ReactElement | null {
       return crumbs
     }
 
+    if (path.startsWith('/recap')) {
+      return [
+        { key: 'profile', label: t('nav.profile'), href: '/profile' },
+        { key: 'recap', label: t('recap.heading') }
+      ]
+    }
     if (path.startsWith('/settings')) return [{ key: 'settings', label: t('nav.settings') }]
     if (path.startsWith('/search')) return [{ key: 'search', label: t('common.search') }]
     if (path.startsWith('/dev/ui')) return [{ key: 'dev', label: 'UI' }]

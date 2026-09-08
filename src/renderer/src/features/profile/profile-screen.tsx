@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { Check, Clock3, Dices, ListPlus, Pencil, Plus, Trophy } from 'lucide-react'
+import { CalendarRange, Check, Clock3, Dices, ListPlus, Pencil, Plus, Trophy } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { STATUS_ORDER } from '@shared/constants'
 import type { GameCardDto } from '@shared/schema/entities'
@@ -503,6 +503,16 @@ export function ProfileScreen(): React.ReactElement {
           storageKey="p.activityMap"
         >
           <ActivityPanel />
+          <div className="pt-3">
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => void navigate({ to: '/recap/$year', params: { year: String(year) } })}
+            >
+              <CalendarRange size={14} strokeWidth={1.75} />
+              {t('profile.recapLink', { year })}
+            </Button>
+          </div>
         </CollapsibleSection>
       </section>
 

@@ -48,6 +48,7 @@ import {
   playthroughInputSchema,
   sessionInputSchema
 } from './schema/sessions'
+import { recapSchema } from './schema/recap'
 import { dateSchema, hexColorSchema, idSchema } from './schema/common'
 import { GAME_STATUSES, IMAGE_KINDS, PLATFORM_FAMILIES } from './constants'
 
@@ -68,6 +69,8 @@ export const channels = {
   'app.openPath': { input: z.object({ target: z.enum(['data', 'logs', 'backups', 'images']) }), output: ok },
   'app.log': { input: z.object({ level: z.enum(['debug', 'info', 'warn', 'error']), message: z.string(), data: z.unknown().optional() }), output: ok },
   'app.relaunch': { input: nothing, output: ok },
+  // Снимок области окна в PNG — экспорт «итогов года» (10 §1). Прямоугольник в CSS-пикселях.
+  'app.capturePng': { input: z.object({ rect: z.object({ x: z.number().int().min(0), y: z.number().int().min(0), width: z.number().int().min(1).max(8000), height: z.number().int().min(1).max(8000) }), fileName: z.string().min(1).max(160) }), output: z.object({ path: z.string() }).nullable() },
 
   /* -------------------------------------------------------- settings */
   'settings.get': { input: nothing, output: settingsSchema },
@@ -200,6 +203,7 @@ export const channels = {
   'profile.get': { input: nothing, output: profileDtoSchema },
   'profile.patch': { input: profilePatchSchema, output: profileDtoSchema },
   'stats.get': { input: nothing, output: statsSchema },
+  'stats.recap': { input: z.object({ year: z.number().int().min(1970).max(9999) }), output: recapSchema },
   'activity.list': { input: z.object({ limit: z.number().int().min(1).max(200).default(20), gameId: idSchema.optional() }).optional(), output: z.array(activityDtoSchema) },
   'profile.nowPlaying': { input: nothing, output: z.array(gameCardDtoSchema.extend({ resumeNote: z.string().nullable() })) },
 
