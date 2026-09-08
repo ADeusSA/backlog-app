@@ -39,13 +39,23 @@ describe('экспорт списка в Markdown (10 §1)', () => {
     expect(md).toContain('2. **B**')
   })
 
-  it('экранирует разметку в названиях', () => {
+  it('экранирует разметку в названиях, но не точки и дефисы', () => {
     expect(escapeMarkdown('[Prototype] *NSYNC')).toBe('\\[Prototype\\] \\*NSYNC')
+    expect(escapeMarkdown('Ori_and_the_Blind_Forest')).toBe('Ori\\_and\\_the\\_Blind\\_Forest')
     const md = buildListMarkdown({
       ...base,
       items: [{ title: 'S.T.A.L.K.E.R.', releaseYear: 2007, meta: [], note: null }]
     })
-    expect(md).toContain('**S\\.T\\.A\\.L\\.K\\.E\\.R\\.** (2007)')
+    expect(md).toContain('**S.T.A.L.K.E.R.** (2007)')
+  })
+
+  it('подпись внизу не экранируется — это текст самого приложения', () => {
+    const md = buildListMarkdown({
+      ...base,
+      footer: 'Экспортировано из Backlog, 9 сент. 2026 г.',
+      items: []
+    })
+    expect(md).toContain('---\n\nЭкспортировано из Backlog, 9 сент. 2026 г.\n')
   })
 
   it('переносит многострочную заметку в цитату с отступом пункта', () => {

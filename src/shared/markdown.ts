@@ -26,12 +26,14 @@ export interface ListMarkdownInput {
 }
 
 /**
- * Экранирует символы, которые Markdown иначе примет за разметку.
- * Названия игр — чужой текст: «S.T.A.L.K.E.R.», «[Prototype]», «*NSYNC»
- * иначе ломали бы жирное начертание и ссылки.
+ * Экранирует символы, которые меняют разметку внутри строки: «[Prototype]», «*NSYNC»,
+ * «Ori and the Blind Forest» с подчёркиваниями иначе ломали бы ссылки и начертание.
+ *
+ * Символы начала строки (`#`, `-`, `1.`) не экранируются: названия всегда стоят после
+ * маркера и `**`, а лишние обратные слэши делают файл нечитаемым в сыром виде.
  */
 export function escapeMarkdown(text: string): string {
-  return text.replace(/([\\`*_{}[\]<>()#+\-.!|])/g, '\\$1')
+  return text.replace(/([\\`*_[\]<>|])/g, '\\$1')
 }
 
 /** Многострочная заметка становится цитатой, поэтому префикс нужен каждой строке. */
@@ -61,7 +63,8 @@ export function buildListMarkdown(input: ListMarkdownInput): string {
     blocks.push(lines.join('\n'))
   }
 
-  if (input.footer) blocks.push(`---\n\n${escapeMarkdown(input.footer)}`)
+  // Подпись и итоги — собственный текст приложения, экранировать его незачем.
+  if (input.footer) blocks.push(`---\n\n${input.footer}`)
 
   return `${blocks.join('\n\n')}\n`
 }
