@@ -114,6 +114,8 @@ export const channels = {
   'lists.setItemNote': { input: z.object({ listId: idSchema, gameId: idSchema, note: z.string().max(300).nullable() }), output: ok },
   'lists.reorderLists': { input: z.object({ orderedIds: z.array(idSchema) }), output: ok },
   'lists.forGame': { input: z.object({ gameId: idSchema }), output: z.array(z.object({ id: idSchema, name: z.string(), icon: z.string().nullable(), color: hexColorSchema.nullable(), contains: z.boolean() })) },
+  // Текст собирает renderer — там локализация; main показывает диалог и пишет файл (10 §1).
+  'lists.exportMarkdown': { input: z.object({ fileName: z.string().min(1).max(160), markdown: z.string().min(1).max(4_000_000) }), output: z.object({ path: z.string() }).nullable() },
 
   /* -------------------------------------------------------- серии */
   'series.list': { input: z.object({ q: z.string().optional(), sort: z.enum(['name', 'games', 'latest', 'progress']).default('name') }).optional(), output: z.array(seriesDtoSchema) },

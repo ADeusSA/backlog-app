@@ -137,3 +137,13 @@ export function providersDir(): string {
 export function settingsFile(): string {
   return path.join(paths().dataDir, 'settings.json')
 }
+
+/** Папка, относительно которой ищется `backlog.config.json`: рядом с exe, в dev — корень проекта. */
+export function appBaseDir(): string {
+  return baseDir()
+}
+
+/** Файл portable-конфига — его переписывает перенос папки данных (06 §8). */
+export function portableConfigFile(): string {
+  return path.join(baseDir(), CONFIG_NAME)
+}

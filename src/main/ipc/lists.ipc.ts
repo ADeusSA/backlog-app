@@ -1,4 +1,8 @@
+import { dialog } from 'electron'
+import { writeFileSync } from 'node:fs'
 import { handle } from './register'
+import { markdownFileName } from '@shared/markdown'
+import { getMainWindow } from '../window'
 import {
   addFromFilterService,
   addGamesToListService,
@@ -45,4 +49,17 @@ export function registerListsIpc(): void {
     return { ok: true as const }
   })
   handle('lists.forGame', ({ gameId }) => getListsForGameService(gameId))
+
+  handle('lists.exportMarkdown', async ({ fileName, markdown }) => {
+    const win = getMainWindow()
+    // Имя чистится ещё раз: renderer мог прислать что угодно, а это путь на диске.
+    const options = {
+      defaultPath: markdownFileName(fileName.replace(/\.md$/i, '')),
+      filters: [{ name: 'Markdown', extensions: ['md'] }]
+    }
+    const result = win ? await dialog.showSaveDialog(win, options) : await dialog.showSaveDialog(options)
+    if (result.canceled || !result.filePath) return null
+    writeFileSync(result.filePath, markdown, 'utf8')
+    return { path: result.filePath }
+  })
 }

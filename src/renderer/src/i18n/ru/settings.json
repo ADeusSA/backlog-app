@@ -9,6 +9,9 @@
   "settings.locale": "Язык интерфейса",
   "settings.dataDir": "Папка данных",
   "settings.openFolder": "Открыть папку",
+  "settings.moveDataDir": "Переместить…",
+  "settings.moveDataDir.action": "Перенести и перезапустить",
+  "settings.moveDataDir.confirm": "База, изображения и копии будут скопированы в «{{dir}}», после чего приложение перезапустится. Старая папка останется на месте — удалите её вручную, когда убедитесь, что всё на месте.",
   "settings.showAchievements": "Показывать достижения и уровень",
   "settings.showAchievements.hint": "Отключает геймификацию целиком",
 
@@ -72,7 +75,11 @@
   "settings.sources.cacheHint": "Ответы хранятся сутки, чтобы повторный поиск не тратил лимит запросов",
   "settings.sources.cacheCleared": "Удалено файлов: {{count}}",
   "settings.sources.attribution": "Ключи хранятся зашифрованными средствами Windows и не попадают в базу, экспорт и логи. Данные об играх предоставлены:",
-  "settings.hotkeys.hint": "В этой версии сочетания фиксированы",
+  "settings.hotkeys.hint": "Нажмите на сочетание и введите новое. Esc — отмена.",
+  "settings.hotkeys.recording": "Нажмите клавиши…",
+  "settings.hotkeys.reset": "Вернуть значение по умолчанию",
+  "settings.hotkeys.resetAll": "Сбросить все сочетания",
+  "settings.hotkeys.conflict": "Это сочетание уже занято действием «{{action}}»",
 
   "settings.version": "Версия",
   "settings.openLogs": "Открыть журнал"

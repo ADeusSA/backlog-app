@@ -1,6 +1,6 @@
 /**
- * Единая таблица горячих клавиш (ТЗ 05 §5). В итерации 1 сочетания фиксированы,
- * но собраны в одном месте, чтобы в итерации 2 сделать редактирование.
+ * Единая таблица горячих клавиш (ТЗ 05 §5). Значения по умолчанию — здесь,
+ * пользовательские переопределения хранятся в `settings.hotkeys` (id → комбинация).
  */
 
 export interface Hotkey {
@@ -47,6 +47,52 @@ export const HOTKEYS: Hotkey[] = [
 export const HOTKEY_BY_ID: Record<string, Hotkey> = Object.fromEntries(
   HOTKEYS.map((h) => [h.id, h])
 )
+
+/** Сочетания «из коробки»: id действия → комбинация. */
+export const DEFAULT_COMBOS: Record<string, string> = Object.fromEntries(
+  HOTKEYS.map((h) => [h.id, h.combo])
+)
+
+export type ComboMap = Record<string, string>
+
+/** Значения по умолчанию, перекрытые настройками пользователя. Незнакомые id игнорируются. */
+export function resolveCombos(overrides: Record<string, string> | undefined): ComboMap {
+  const map: ComboMap = { ...DEFAULT_COMBOS }
+  for (const [id, combo] of Object.entries(overrides ?? {})) {
+    if (map[id] !== undefined && combo) map[id] = combo
+  }
+  return map
+}
+
+/** Действие, которому назначено нажатое сочетание; `allowed` сужает поиск до нужной группы. */
+export function idByCombo(combos: ComboMap, combo: string, allowed?: Set<string>): string | null {
+  for (const [id, value] of Object.entries(combos)) {
+    if (value === combo && (!allowed || allowed.has(id))) return id
+  }
+  return null
+}
+
+/**
+ * Клавиши, которые нельзя назначать: ими закрывают диалоги и ходят по интерфейсу,
+ * а `Escape` вдобавок отменяет саму запись сочетания.
+ */
+const RESERVED_KEYS = new Set(['escape', 'enter', 'tab', ' ', 'dead', 'unidentified'])
+
+/** Годится ли записанное сочетание: не голый модификатор и не служебная клавиша. */
+export function isAssignableCombo(combo: string): boolean {
+  const parts = combo.split('+')
+  const key = parts[parts.length - 1] ?? ''
+  if (!key || ['ctrl', 'alt', 'shift'].includes(key)) return false
+  return !RESERVED_KEYS.has(key)
+}
+
+/** id действия, которое уже занимает это сочетание (кроме самого `id`), либо null. */
+export function comboConflict(combos: ComboMap, id: string, combo: string): string | null {
+  for (const [other, value] of Object.entries(combos)) {
+    if (other !== id && value === combo) return other
+  }
+  return null
+}
 
 /** Нормализует событие клавиатуры в строку вида 'ctrl+shift+f'. */
 export function comboFromEvent(event: KeyboardEvent): string {

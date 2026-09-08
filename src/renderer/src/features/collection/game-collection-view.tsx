@@ -44,6 +44,7 @@ import { toast } from '@/components/ui/toast'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { call } from '@/platform/api'
 import { formatPlaytime } from '@/lib/format'
+import { comboFromEvent, resolveCombos } from '@/lib/hotkeys'
 import { shouldAnimateLayout } from '@/lib/motion'
 import { useSettings } from '@/stores/settings-store'
 import { useUiStore } from '@/stores/ui-store'
@@ -93,6 +94,7 @@ export function GameCollectionView(props: GameCollectionViewProps): React.ReactE
     ...(defaultGroupBy ? { defaultGroupBy } : {})
   })
   const { state } = view
+  const combos = useMemo(() => resolveCombos(settings.hotkeys), [settings.hotkeys])
 
   const selection = useUiStore((s) => s.selection)
   const toggleSelected = useUiStore((s) => s.toggleSelected)
@@ -206,18 +208,31 @@ export function GameCollectionView(props: GameCollectionViewProps): React.ReactE
     [t, onChanged, clearSelection]
   )
 
-  // Ctrl+A / Esc внутри коллекции (07 §3)
+  // Ctrl+A / Esc внутри коллекции (07 §3) и сочетания группы «collection» (05 §5)
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent): void => {
       const target = event.target
       const typing =
         target instanceof HTMLElement &&
         (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)
-      if (typing) return
+      // Escape выходит и из поля быстрого поиска, поэтому проверяется до отсева ввода.
       if (event.key === 'Escape') {
         clearSelection()
         setQuickFilterOpen(false)
+        return
       }
+      const combo = comboFromEvent(event)
+      if (combo === combos['findInCollection']) {
+        event.preventDefault()
+        setQuickFilterOpen(true)
+        return
+      }
+      if (showFilters && combo === combos['toggleFilters']) {
+        event.preventDefault()
+        view.setFilterPanelOpen(!view.filterPanelOpen)
+        return
+      }
+      if (typing) return
       if (event.key.toLowerCase() === 'a' && event.ctrlKey) {
         event.preventDefault()
         setSelection(items.map((game) => game.id))
@@ -225,7 +240,7 @@ export function GameCollectionView(props: GameCollectionViewProps): React.ReactE
     }
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
-  }, [items, clearSelection, setSelection, setQuickFilterOpen])
+  }, [items, clearSelection, setSelection, setQuickFilterOpen, combos, showFilters, view])
 
   const rollRandom = (): void => {
     void call('collection.random', {

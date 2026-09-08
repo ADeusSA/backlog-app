@@ -9,6 +9,9 @@
   "settings.locale": "Interface language",
   "settings.dataDir": "Data folder",
   "settings.openFolder": "Open folder",
+  "settings.moveDataDir": "Move…",
+  "settings.moveDataDir.action": "Move and restart",
+  "settings.moveDataDir.confirm": "The database, images and backups will be copied to “{{dir}}”, then the app will restart. The old folder stays where it is — delete it manually once you have checked everything is there.",
   "settings.showAchievements": "Show achievements and level",
   "settings.showAchievements.hint": "Turns gamification off completely",
 
@@ -72,7 +75,11 @@
   "settings.sources.cacheHint": "Responses are kept for a day so repeat searches don't spend the request budget",
   "settings.sources.cacheCleared": "Files removed: {{count}}",
   "settings.sources.attribution": "Keys are stored encrypted by Windows and never reach the database, exports or logs. Game data provided by:",
-  "settings.hotkeys.hint": "Shortcuts are fixed in this version",
+  "settings.hotkeys.hint": "Click a shortcut and press the new keys. Esc cancels.",
+  "settings.hotkeys.recording": "Press keys…",
+  "settings.hotkeys.reset": "Restore the default",
+  "settings.hotkeys.resetAll": "Reset all shortcuts",
+  "settings.hotkeys.conflict": "That shortcut is already taken by “{{action}}”",
 
   "settings.version": "Version",
   "settings.openLogs": "Open log folder"

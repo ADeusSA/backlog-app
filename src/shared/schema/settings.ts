@@ -17,6 +17,12 @@ export const settingsSchema = z.object({
   viewByScope: z.record(z.string(), z.enum(VIEW_MODES)).default({}),
   /** Состояние панели фильтров на каждый scope. */
   filterPanelByScope: z.record(z.string(), z.boolean()).default({}),
+  /**
+   * Переопределённые сочетания клавиш: id действия → комбинация (05 §5, итерация 2).
+   * Записываются целиком, а не по ключам, — иначе сброс сочетания к значению
+   * по умолчанию (удаление ключа) не доезжал бы до файла.
+   */
+  hotkeys: z.record(z.string().max(40), z.string().max(40)).default({}),
   /** Настраиваемое второе поле подписи карточки (07 §3). */
   cardSecondaryField: z
     .enum(['year_playtime', 'developer', 'genre', 'rating', 'metacritic', 'platform', 'added_at'])

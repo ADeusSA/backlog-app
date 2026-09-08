@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useParams } from '@tanstack/react-router'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { ExternalLink, Gamepad2, Pencil } from 'lucide-react'
@@ -16,7 +16,7 @@ import { StatusPicker } from '@/components/ui/status-picker'
 import { toast } from '@/components/ui/toast'
 import { call } from '@/platform/api'
 import { formatDate, formatPlaytime, formatRelative } from '@/lib/format'
-import { comboFromEvent, isTypingTarget } from '@/lib/hotkeys'
+import { comboFromEvent, isTypingTarget, resolveCombos } from '@/lib/hotkeys'
 import { useSettings } from '@/stores/settings-store'
 import { PlaythroughsSection } from '@/features/sessions/playthroughs-section'
 import { SessionsSection } from '@/features/sessions/sessions-section'
@@ -38,6 +38,7 @@ export function GameScreen(): React.ReactElement {
   const hoursInputRef = useRef<HTMLInputElement>(null)
   const [adding, setAdding] = useState(false)
   const settings = useSettings()
+  const combos = useMemo(() => resolveCombos(settings.hotkeys), [settings.hotkeys])
 
   const { data: game, isPending } = useQuery({
     queryKey: ['game', gameId],
@@ -64,19 +65,19 @@ export function GameScreen(): React.ReactElement {
     const onKeyDown = (event: KeyboardEvent): void => {
       if (isTypingTarget(event.target)) return
       const combo = comboFromEvent(event)
-      if (combo === 'e') {
+      if (combo === combos['game.edit']) {
         event.preventDefault()
         void navigate({ to: '/catalog/$entity/$id/edit', params: { entity: 'games', id: game.id } })
       }
-      if (combo === 'r') {
+      if (combo === combos['game.rate']) {
         event.preventDefault()
         ratingRef.current?.focus()
       }
-      if (combo === 't') {
+      if (combo === combos['game.time']) {
         event.preventDefault()
         hoursInputRef.current?.focus()
       }
-      if (combo === 'f' && game.userGame) {
+      if (combo === combos['game.favorite'] && game.userGame) {
         event.preventDefault()
         void call('userGame.patch', {
           gameId: game.id,
@@ -86,7 +87,7 @@ export function GameScreen(): React.ReactElement {
     }
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
-  }, [game, navigate, queryClient])
+  }, [game, navigate, queryClient, combos])
 
   if (isPending) {
     return (

@@ -31,6 +31,9 @@
   "lists.duplicate": "Дублировать",
   "lists.duplicated": "Список продублирован",
   "lists.exportMarkdown": "Экспортировать в Markdown",
+  "lists.exported": "Список сохранён",
+  "lists.export.summary": "{{games}} · пройдено {{done}} · {{playtime}}",
+  "lists.export.footer": "Экспортировано из Backlog, {{date}}",
 
   "lists.delete.title": "Удалить список «{{name}}»?",
   "lists.delete.hint": "Игры останутся в библиотеке — удалится только сам список.",

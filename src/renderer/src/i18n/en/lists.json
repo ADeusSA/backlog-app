@@ -31,6 +31,9 @@
   "lists.duplicate": "Duplicate",
   "lists.duplicated": "List duplicated",
   "lists.exportMarkdown": "Export to Markdown",
+  "lists.exported": "List saved",
+  "lists.export.summary": "{{games}} · {{done}} completed · {{playtime}}",
+  "lists.export.footer": "Exported from Backlog, {{date}}",
 
   "lists.delete.title": "Delete list \"{{name}}\"?",
   "lists.delete.hint": "Games stay in your library — only the list itself is removed.",

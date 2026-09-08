@@ -1,7 +1,8 @@
 import { useTranslation } from 'react-i18next'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Kbd } from '@/components/ui/kbd'
-import { HOTKEYS, formatCombo } from '@/lib/hotkeys'
+import { HOTKEYS, formatCombo, resolveCombos } from '@/lib/hotkeys'
+import { useSettings } from '@/stores/settings-store'
 import { useUiStore } from '@/stores/ui-store'
 
 const GROUPS = ['global', 'library', 'collection', 'game'] as const
@@ -11,6 +12,7 @@ export function HotkeysHelp(): React.ReactElement {
   const { t } = useTranslation()
   const open = useUiStore((s) => s.hotkeysHelpOpen)
   const setOpen = useUiStore((s) => s.setHotkeysHelpOpen)
+  const combos = resolveCombos(useSettings().hotkeys)
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -27,7 +29,7 @@ export function HotkeysHelp(): React.ReactElement {
                   <span className="type-small" style={{ color: 'var(--text-2)' }}>
                     {t(hotkey.i18nKey)}
                   </span>
-                  <Kbd keys={formatCombo(hotkey.combo).split(' + ')} />
+                  <Kbd keys={formatCombo(combos[hotkey.id] ?? hotkey.combo).split(' + ')} />
                 </div>
               ))}
             </section>

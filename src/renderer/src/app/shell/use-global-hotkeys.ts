@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { useNavigate } from '@tanstack/react-router'
-import { comboFromEvent, isTypingTarget, HOTKEYS } from '@/lib/hotkeys'
+import { comboFromEvent, idByCombo, isTypingTarget, resolveCombos, HOTKEY_BY_ID, HOTKEYS } from '@/lib/hotkeys'
+import { useSettings } from '@/stores/settings-store'
 import { useUiStore } from '@/stores/ui-store'
 import { call } from '@/platform/api'
 import { router } from '../router'
@@ -18,15 +19,17 @@ const LIBRARY_HOTKEYS: Record<string, string> = {
 /** Глобальные горячие клавиши (ТЗ 05 §5). Таблица — в `@/lib/hotkeys`. */
 export function useGlobalHotkeys(): void {
   const navigate = useNavigate()
+  const overrides = useSettings().hotkeys
 
   useEffect(() => {
     const globalIds = new Set(
       HOTKEYS.filter((h) => h.group === 'global' || h.group === 'library').map((h) => h.id)
     )
+    const combos = resolveCombos(overrides)
 
     const onKeyDown = (event: KeyboardEvent): void => {
-      const combo = comboFromEvent(event)
-      const hotkey = HOTKEYS.find((h) => h.combo === combo && globalIds.has(h.id))
+      const id = idByCombo(combos, comboFromEvent(event), globalIds)
+      const hotkey = id ? HOTKEY_BY_ID[id] : undefined
       if (!hotkey) return
       if (isTypingTarget(event.target) && !hotkey.allowInInput) return
 
@@ -82,7 +85,7 @@ export function useGlobalHotkeys(): void {
 
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
-  }, [navigate])
+  }, [navigate, overrides])
 
   // Кнопки мыши «назад/вперёд» (XButton1/XButton2) — 05 §4.1
   useEffect(() => {
