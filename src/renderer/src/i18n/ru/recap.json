@@ -1,0 +1,41 @@
+{
+  "recap.heading": "Итоги года",
+  "recap.title": "Итоги года",
+  "recap.savePng": "Сохранить PNG",
+  "recap.saved": "Картинка сохранена",
+  "recap.tooSmall": "Карточка не помещается в окно целиком — разверните окно и попробуйте снова",
+  "recap.empty": "За этот год данных нет",
+  "recap.emptyHint": "Отметьте игры пройденными или запишите сессии — итоги появятся сами",
+  "recap.nothing": "Пусто",
+
+  "recap.completed": "Пройдено",
+  "recap.played": "Наиграно",
+  "recap.days": "Дней с игрой",
+  "recap.streak": "Лучшая серия",
+  "recap.topByHours": "Больше всего часов",
+  "recap.topRated": "Лучшие оценки",
+
+  "recap.added": "Добавлено в библиотеку: {{count}}",
+  "recap.sessions": "Сессий: {{count}}",
+  "recap.mastered": "На 100 %: {{count}}",
+  "recap.avgRating": "Средняя оценка {{value}} по {{count}} играм",
+  "recap.bestMonth": "Самый плотный месяц — {{month}}, {{time}}",
+  "recap.genres": "Жанры: {{list}}",
+  "recap.firstLast": "Первой пройдена «{{first}}», последней — «{{last}}»",
+  "recap.onlyOne": "Единственная пройденная — «{{title}}»",
+
+  "recap.months": [
+    "январь",
+    "февраль",
+    "март",
+    "апрель",
+    "май",
+    "июнь",
+    "июль",
+    "август",
+    "сентябрь",
+    "октябрь",
+    "ноябрь",
+    "декабрь"
+  ]
+}

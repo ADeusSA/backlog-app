@@ -57,31 +57,54 @@ export function hslToHex({ h, s, l }: Hsl): string {
 
 export const DEFAULT_BLOOM_A = '#4b3bc7'
 export const DEFAULT_BLOOM_B = '#0f7c6e'
+/** Те же оттенки, но в светлоте светлой темы (04 §8) — значения из `tokens.css`. */
+export const LIGHT_BLOOM_A = '#b3a6f5'
+export const LIGHT_BLOOM_B = '#7fd0c4'
+
+type BloomTheme = 'dark' | 'light'
+
+/** Границы светлоты свечения: тёмная сцена требует приглушённых, светлая — бледных (04 §2.4, §8). */
+const BLOOM_RANGE: Record<BloomTheme, { s: [number, number]; l: [number, number] }> = {
+  dark: { s: [0.4, 0.62], l: [0.28, 0.4] },
+  light: { s: [0.35, 0.55], l: [0.55, 0.7] }
+}
+
+export function defaultBloom(theme: BloomTheme = 'dark'): { a: string; b: string } {
+  return theme === 'light'
+    ? { a: LIGHT_BLOOM_A, b: LIGHT_BLOOM_B }
+    : { a: DEFAULT_BLOOM_A, b: DEFAULT_BLOOM_B }
+}
 
 /**
- * Ограничение насыщенности и светлоты свечения (04 §2.4):
- * s ∈ [0.40, 0.62], l ∈ [0.28, 0.40]. Слишком светлые обложки (l > 0.7)
- * дают палитру по умолчанию, чтобы не «засветить» экран.
+ * Ограничение насыщенности и светлоты свечения (04 §2.4).
+ * Слишком светлые обложки (l > 0.7) в тёмной теме дают палитру по умолчанию,
+ * чтобы не «засветить» экран; в светлой так же поступают слишком тёмные (l < 0.15).
  */
-export function clampBloom(hex: string | null | undefined): string {
-  if (!hex) return DEFAULT_BLOOM_A
+export function clampBloom(hex: string | null | undefined, theme: BloomTheme = 'dark'): string {
+  const fallback = defaultBloom(theme).a
+  if (!hex) return fallback
   const hsl = hexToHsl(hex)
-  if (!hsl) return DEFAULT_BLOOM_A
-  if (hsl.l > 0.7) return DEFAULT_BLOOM_A
+  if (!hsl) return fallback
+  if (theme === 'dark' ? hsl.l > 0.7 : hsl.l < 0.15) return fallback
+  const range = BLOOM_RANGE[theme]
   return hslToHex({
     h: hsl.h,
-    s: Math.min(0.62, Math.max(0.4, hsl.s)),
-    l: Math.min(0.4, Math.max(0.28, hsl.l))
+    s: Math.min(range.s[1], Math.max(range.s[0], hsl.s)),
+    l: Math.min(range.l[1], Math.max(range.l[0], hsl.l))
   })
 }
 
 /** Второе свечение — тот же оттенок со сдвигом −40° (04 §2.4). */
-export function bloomPair(hex: string | null | undefined): { a: string; b: string } {
-  if (!hex) return { a: DEFAULT_BLOOM_A, b: DEFAULT_BLOOM_B }
-  const a = clampBloom(hex)
-  if (a === DEFAULT_BLOOM_A) return { a: DEFAULT_BLOOM_A, b: DEFAULT_BLOOM_B }
+export function bloomPair(
+  hex: string | null | undefined,
+  theme: BloomTheme = 'dark'
+): { a: string; b: string } {
+  const fallback = defaultBloom(theme)
+  if (!hex) return fallback
+  const a = clampBloom(hex, theme)
+  if (a === fallback.a) return fallback
   const hsl = hexToHsl(a)
-  if (!hsl) return { a, b: DEFAULT_BLOOM_B }
+  if (!hsl) return { a, b: fallback.b }
   return { a, b: hslToHex({ ...hsl, h: hsl.h - 40 }) }
 }
 

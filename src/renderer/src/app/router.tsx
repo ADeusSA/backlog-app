@@ -10,6 +10,7 @@ import { z } from 'zod'
 import { GAME_STATUSES } from '@shared/constants'
 import { AppShell } from './shell/app-shell'
 import { ProfileScreen } from '@/features/profile/profile-screen'
+import { RecapScreen } from '@/features/recap/recap-screen'
 import { LibraryScreen } from '@/features/library/library-screen'
 import { ListsScreen } from '@/features/lists/lists-screen'
 import { ListScreen } from '@/features/lists/list-screen'
@@ -65,6 +66,12 @@ const profileRoute = createRoute({
   getParentRoute: () => shellRoute,
   path: '/profile',
   component: ProfileScreen
+})
+
+const recapRoute = createRoute({
+  getParentRoute: () => shellRoute,
+  path: '/recap/$year',
+  component: RecapScreen
 })
 
 const libraryRoute = createRoute({
@@ -182,6 +189,7 @@ const routeTree = rootRoute.addChildren([
   shellRoute.addChildren([
     indexRoute,
     profileRoute,
+    recapRoute,
     libraryRoute,
     listsRoute,
     listRoute,

@@ -14,7 +14,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { toast } from '@/components/ui/toast'
 import { CoverImage } from '@/components/ui/image'
 import { GameCollectionView } from '@/features/collection/game-collection-view'
@@ -25,6 +24,7 @@ import { ListFormDialog } from './components/list-form-dialog'
 import { DeleteListDialog } from './components/delete-list-dialog'
 import { AddGamesDialog } from './components/add-games-dialog'
 import { ListItemExtra } from './components/list-item-extra'
+import { exportListToMarkdown } from './export-markdown'
 
 const SORT_BY_MODE: Record<ListSortMode, Sort> = {
   manual: { field: 'position', dir: 'asc' },
@@ -165,6 +165,16 @@ export function ListScreen(): ReactElement {
     await queryClient.invalidateQueries({ queryKey: ['lists', listId] })
   }
 
+  async function exportMarkdown(): Promise<void> {
+    if (!list) return
+    try {
+      const saved = await exportListToMarkdown(list, SORT_BY_MODE[list.sortMode], t)
+      if (saved) toast({ title: t('lists.exported'), description: saved, tone: 'success' })
+    } catch (err) {
+      toast({ title: (err as Error).message, tone: 'danger' })
+    }
+  }
+
   async function duplicate(): Promise<void> {
     try {
       const copy = await call('lists.duplicate', { id: listId })
@@ -214,17 +224,10 @@ export function ListScreen(): ReactElement {
                   <Copy size={14} strokeWidth={1.75} />
                   {t('lists.duplicate')}
                 </DropdownMenuItem>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <div>
-                      <DropdownMenuItem disabled onSelect={(e) => e.preventDefault()}>
-                        <Download size={14} strokeWidth={1.75} />
-                        {t('lists.exportMarkdown')}
-                      </DropdownMenuItem>
-                    </div>
-                  </TooltipTrigger>
-                  <TooltipContent>{t('error.not_implemented')}</TooltipContent>
-                </Tooltip>
+                <DropdownMenuItem onSelect={() => void exportMarkdown()}>
+                  <Download size={14} strokeWidth={1.75} />
+                  {t('lists.exportMarkdown')}
+                </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   onSelect={() => setDeleteOpen(true)}

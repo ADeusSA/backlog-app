@@ -1,0 +1,41 @@
+{
+  "recap.heading": "Year in review",
+  "recap.title": "Year in review",
+  "recap.savePng": "Save PNG",
+  "recap.saved": "Image saved",
+  "recap.tooSmall": "The card does not fit in the window — enlarge the window and try again",
+  "recap.empty": "Nothing for this year yet",
+  "recap.emptyHint": "Mark games as completed or log sessions — the recap builds itself",
+  "recap.nothing": "Empty",
+
+  "recap.completed": "Completed",
+  "recap.played": "Played",
+  "recap.days": "Days with a game",
+  "recap.streak": "Best streak",
+  "recap.topByHours": "Most hours",
+  "recap.topRated": "Highest rated",
+
+  "recap.added": "Added to the library: {{count}}",
+  "recap.sessions": "Sessions: {{count}}",
+  "recap.mastered": "At 100 %: {{count}}",
+  "recap.avgRating": "Average rating {{value}} across {{count}} games",
+  "recap.bestMonth": "Busiest month — {{month}}, {{time}}",
+  "recap.genres": "Genres: {{list}}",
+  "recap.firstLast": "First completed “{{first}}”, last “{{last}}”",
+  "recap.onlyOne": "The only game completed — “{{title}}”",
+
+  "recap.months": [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December"
+  ]
+}

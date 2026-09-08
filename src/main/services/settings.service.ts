@@ -42,6 +42,7 @@ export function patchSettings(patch: SettingsPatch): Settings {
     window: { ...current.window, ...(patch.window ?? {}) },
     sync: { ...current.sync, ...(patch.sync ?? {}) },
     backups: { ...current.backups, ...(patch.backups ?? {}) },
+    tray: { ...current.tray, ...(patch.tray ?? {}) },
     viewByScope: { ...current.viewByScope, ...(patch.viewByScope ?? {}) },
     filterPanelByScope: { ...current.filterPanelByScope, ...(patch.filterPanelByScope ?? {}) }
   }

@@ -1,17 +1,17 @@
-import { dialog } from 'electron'
+import { app, dialog } from 'electron'
 import { handle } from './register'
 import { getSettings, patchSettings } from '../services/settings.service'
-import { getMainWindow, setTitleBarTheme } from '../window'
-import { AppError } from '@shared/errors'
+import { moveDataDir } from '../services/data-dir.service'
+import { applyTraySettings } from '../tray'
+import { applyWindowTheme, getMainWindow } from '../window'
 
 export function registerSettingsIpc(): void {
   handle('settings.get', () => getSettings())
 
   handle('settings.patch', (patch) => {
     const next = patchSettings(patch)
-    if (patch.theme) {
-      setTitleBarTheme(next.theme === 'light' ? '#F3F4F8' : '#0B0D14', next.theme === 'light' ? '#4B5163' : '#9AA3B8')
-    }
+    if (patch.tray || patch.locale) applyTraySettings()
+    if (patch.theme) applyWindowTheme()
     return next
   })
 
@@ -23,8 +23,11 @@ export function registerSettingsIpc(): void {
     return { dir: result.canceled ? null : (result.filePaths[0] ?? null) }
   })
 
-  handle('settings.moveDataDir', () => {
-    // Перенос папки данных выполняется вместе с блоком синхронизации/бэкапов (06 §8).
-    throw new AppError('not_implemented', 'Перенос папки данных появится в следующей сборке')
+  handle('settings.moveDataDir', ({ dir }) => {
+    moveDataDir(dir)
+    // Пути вычисляются до app.whenReady() и уже указывают на старую папку — только перезапуск.
+    app.relaunch()
+    app.exit(0)
+    return { ok: true as const }
   })
 }

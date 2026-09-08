@@ -1,7 +1,8 @@
 import { useEffect } from 'react'
 import { animate } from 'motion/react'
 import type { AnimationMode } from '@shared/constants'
-import { DEFAULT_BLOOM_A, DEFAULT_BLOOM_B, bloomPair } from '@/lib/color'
+import { bloomPair, defaultBloom } from '@/lib/color'
+import { resolveTheme, type ThemeSetting } from '@/lib/theme'
 import { DURATION, effectiveMotion } from '@/lib/motion'
 
 /**
@@ -11,13 +12,20 @@ import { DURATION, effectiveMotion } from '@/lib/motion'
  * переменные на `<html>` и вернуть исходные цвета при уходе со страницы — без обращения
  * к компонентам/сторам вне зоны ответственности этого блока.
  */
-export function useGameBloom(dominantColor: string | null | undefined, motionSetting: AnimationMode): void {
+export function useGameBloom(
+  dominantColor: string | null | undefined,
+  motionSetting: AnimationMode,
+  themeSetting: ThemeSetting
+): void {
   useEffect(() => {
     const root = document.documentElement
-    const target = bloomPair(dominantColor)
+    // Границы светлоты и цвета «по умолчанию» разные у тёмной и светлой сцены (04 §8).
+    const theme = resolveTheme(themeSetting)
+    const base = defaultBloom(theme)
+    const target = bloomPair(dominantColor, theme)
     const durationSeconds = effectiveMotion(motionSetting) === 'off' ? 0 : DURATION.bloom
-    const currentA = getComputedStyle(root).getPropertyValue('--bloom-a').trim() || DEFAULT_BLOOM_A
-    const currentB = getComputedStyle(root).getPropertyValue('--bloom-b').trim() || DEFAULT_BLOOM_B
+    const currentA = getComputedStyle(root).getPropertyValue('--bloom-a').trim() || base.a
+    const currentB = getComputedStyle(root).getPropertyValue('--bloom-b').trim() || base.b
 
     const inA = animate(currentA, target.a, {
       duration: durationSeconds,
@@ -31,15 +39,19 @@ export function useGameBloom(dominantColor: string | null | undefined, motionSet
     return () => {
       inA.stop()
       inB.stop()
-      animate(target.a, DEFAULT_BLOOM_A, {
+      // Возврат к сцене: анимация в цвет темы, затем инлайновые значения снимаются,
+      // иначе смена темы оставила бы на <html> свечения предыдущей.
+      animate(target.a, base.a, {
         duration: durationSeconds,
-        onUpdate: (value: string) => root.style.setProperty('--bloom-a', value)
+        onUpdate: (value: string) => root.style.setProperty('--bloom-a', value),
+        onComplete: () => root.style.removeProperty('--bloom-a')
       })
-      animate(target.b, DEFAULT_BLOOM_B, {
+      animate(target.b, base.b, {
         duration: durationSeconds,
-        onUpdate: (value: string) => root.style.setProperty('--bloom-b', value)
+        onUpdate: (value: string) => root.style.setProperty('--bloom-b', value),
+        onComplete: () => root.style.removeProperty('--bloom-b')
       })
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dominantColor])
+  }, [dominantColor, themeSetting])
 }

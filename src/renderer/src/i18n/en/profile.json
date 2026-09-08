@@ -12,6 +12,7 @@
   "profile.rings.mastered": "100% of completed",
   "profile.rings.yearGoal": "{{year}} goal",
   "profile.rings.setGoal": "Set a goal",
+  "profile.recapLink": "{{year}} in review",
   "profile.rings.thisYear": "This year: {{count}}",
 
   "profile.nowPlaying.title": "Now playing",

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useNavigate, useParams } from '@tanstack/react-router'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import {
@@ -10,6 +10,7 @@ import {
   Palette,
   Plug,
   RefreshCw,
+  RotateCcw,
   Settings2,
   Trash2,
   type LucideIcon
@@ -17,6 +18,7 @@ import {
 import { useTranslation } from 'react-i18next'
 import type { ImportProvider, Locale } from '@shared/constants'
 import type { ProviderStatus } from '@shared/schema/providers'
+import type { Settings } from '@shared/schema/settings'
 import { Button } from '@/components/ui/button'
 import { Segmented } from '@/components/ui/segmented'
 import { Switch } from '@/components/ui/switch'
@@ -30,7 +32,17 @@ import { useSyncStore } from '@/stores/sync-store'
 import { call } from '@/platform/api'
 import { changeLocale } from '@/i18n'
 import { formatBytes, formatDateTime } from '@/lib/format'
-import { HOTKEYS, formatCombo } from '@/lib/hotkeys'
+import {
+  comboConflict,
+  comboFromEvent,
+  DEFAULT_COMBOS,
+  formatCombo,
+  HOTKEY_BY_ID,
+  HOTKEYS,
+  isAssignableCombo,
+  resolveCombos,
+  type Hotkey
+} from '@/lib/hotkeys'
 import { cn } from '@/lib/utils'
 
 const SECTIONS: Array<{ id: string; icon: LucideIcon }> = [
@@ -115,6 +127,27 @@ function GeneralSection(): React.ReactElement {
   const settings = useSettingsStore((s) => s.settings)
   const patch = useSettingsStore((s) => s.patch)
   const { data: paths } = useQuery({ queryKey: ['paths'], queryFn: () => call('app.getPaths') })
+  const [target, setTarget] = useState<string | null>(null)
+  const [moving, setMoving] = useState(false)
+
+  async function chooseTarget(): Promise<void> {
+    const chosen = await call('settings.chooseDataDir')
+    if (chosen.dir) setTarget(chosen.dir)
+  }
+
+  /** Успешный перенос заканчивается перезапуском, поэтому ответа здесь можно не дождаться. */
+  async function move(): Promise<void> {
+    if (!target) return
+    setMoving(true)
+    try {
+      await call('settings.moveDataDir', { dir: target })
+    } catch (err) {
+      toast({ title: (err as Error).message, tone: 'danger' })
+      setTarget(null)
+    } finally {
+      setMoving(false)
+    }
+  }
 
   return (
     <section className="flex max-w-[720px] flex-col">
@@ -134,16 +167,61 @@ function GeneralSection(): React.ReactElement {
       </Row>
       <Separator />
       <Row title={t('settings.dataDir')} description={paths?.dataDir}>
-        <Button variant="secondary" size="sm" onClick={() => void call('app.openPath', { target: 'data' })}>
-          <FolderOpen size={14} strokeWidth={1.75} />
-          {t('settings.openFolder')}
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="secondary" size="sm" onClick={() => void call('app.openPath', { target: 'data' })}>
+            <FolderOpen size={14} strokeWidth={1.75} />
+            {t('settings.openFolder')}
+          </Button>
+          <Button variant="secondary" size="sm" onClick={() => void chooseTarget()}>
+            {t('settings.moveDataDir')}
+          </Button>
+        </div>
       </Row>
+
+      <Dialog open={target !== null} onOpenChange={(open) => !open && setTarget(null)}>
+        <DialogContent size={480}>
+          <DialogHeader>
+            <DialogTitle>{t('settings.moveDataDir')}</DialogTitle>
+          </DialogHeader>
+          <p className="type-body" style={{ color: 'var(--text-2)' }}>
+            {t('settings.moveDataDir.confirm', { dir: target ?? '' })}
+          </p>
+          <DialogFooter>
+            <Button variant="secondary" onClick={() => setTarget(null)}>
+              {t('action.cancel')}
+            </Button>
+            <Button variant="primary" loading={moving} onClick={() => void move()}>
+              {t('settings.moveDataDir.action')}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
       <Separator />
       <Row title={t('settings.showAchievements')} description={t('settings.showAchievements.hint')}>
         <Switch
           checked={settings.showAchievements}
           onChange={(showAchievements) => void patch({ showAchievements })}
+        />
+      </Row>
+      <Separator />
+      <Row title={t('settings.tray')} description={t('settings.tray.hint')}>
+        <Switch
+          checked={settings.tray.enabled}
+          onChange={(enabled) => void patch({ tray: { ...settings.tray, enabled } })}
+        />
+      </Row>
+      <Row title={t('settings.tray.minimizeOnClose')}>
+        <Switch
+          checked={settings.tray.minimizeOnClose}
+          disabled={!settings.tray.enabled}
+          onChange={(minimizeOnClose) => void patch({ tray: { ...settings.tray, minimizeOnClose } })}
+        />
+      </Row>
+      <Row title={t('settings.tray.startMinimized')}>
+        <Switch
+          checked={settings.tray.startMinimized}
+          disabled={!settings.tray.enabled}
+          onChange={(startMinimized) => void patch({ tray: { ...settings.tray, startMinimized } })}
         />
       </Row>
     </section>
@@ -159,10 +237,14 @@ function AppearanceSection(): React.ReactElement {
     <section className="flex max-w-[720px] flex-col">
       <h2 className="type-h2 pb-2">{t('settings.section.appearance')}</h2>
       <Row title={t('settings.theme')} description={t('settings.theme.hint')}>
-        <Segmented
-          value="dark"
-          onChange={() => undefined}
-          options={[{ value: 'dark', label: t('settings.theme.dark') }]}
+        <Segmented<Settings['theme']>
+          value={settings.theme}
+          onChange={(theme) => void patch({ theme })}
+          options={[
+            { value: 'system', label: t('settings.theme.system') },
+            { value: 'light', label: t('settings.theme.light') },
+            { value: 'dark', label: t('settings.theme.dark') }
+          ]}
         />
       </Row>
       <Separator />
@@ -662,8 +744,101 @@ function ProviderCard({
   )
 }
 
+/** Строка таблицы сочетаний: показ, запись нового и сброс к значению по умолчанию (05 §5). */
+function HotkeyRow({
+  hotkey,
+  combo,
+  recording,
+  onRecord,
+  onAssign
+}: {
+  hotkey: Hotkey
+  combo: string
+  recording: boolean
+  onRecord: (id: string | null) => void
+  onAssign: (id: string, combo: string | null) => void
+}): React.ReactElement {
+  const { t } = useTranslation()
+  const changed = combo !== DEFAULT_COMBOS[hotkey.id]
+
+  // Пока идёт запись, окно ловит любое нажатие: иначе Ctrl+K открыл бы палитру.
+  useEffect(() => {
+    if (!recording) return
+    const onKeyDown = (event: KeyboardEvent): void => {
+      event.preventDefault()
+      event.stopPropagation()
+      if (event.key === 'Escape') {
+        onRecord(null)
+        return
+      }
+      const next = comboFromEvent(event)
+      if (!isAssignableCombo(next)) return
+      onAssign(hotkey.id, next)
+    }
+    window.addEventListener('keydown', onKeyDown, true)
+    return () => window.removeEventListener('keydown', onKeyDown, true)
+  }, [recording, hotkey.id, onRecord, onAssign])
+
+  return (
+    <div className="flex items-center justify-between gap-4 py-1.5">
+      <span className="type-body" style={{ color: 'var(--text-2)' }}>
+        {t(hotkey.i18nKey)}
+      </span>
+      <div className="flex items-center gap-2">
+        {changed && (
+          <Button
+            variant="icon"
+            size="sm"
+            aria-label={t('settings.hotkeys.reset')}
+            onClick={() => onAssign(hotkey.id, null)}
+          >
+            <RotateCcw size={14} strokeWidth={1.75} />
+          </Button>
+        )}
+        <button
+          type="button"
+          className="rounded-[var(--r-sm)] px-1 outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--border-focus)]"
+          onClick={() => onRecord(recording ? null : hotkey.id)}
+        >
+          {recording ? (
+            <span className="type-small" style={{ color: 'var(--accent)' }}>
+              {t('settings.hotkeys.recording')}
+            </span>
+          ) : (
+            <Kbd keys={formatCombo(combo).split(' + ')} />
+          )}
+        </button>
+      </div>
+    </div>
+  )
+}
+
 function HotkeysSection(): React.ReactElement {
   const { t } = useTranslation()
+  const settings = useSettingsStore((s) => s.settings)
+  const patch = useSettingsStore((s) => s.patch)
+  const [recording, setRecording] = useState<string | null>(null)
+  const combos = resolveCombos(settings.hotkeys)
+
+  const assign = useCallback(
+    (id: string, combo: string | null) => {
+      const current = resolveCombos(useSettingsStore.getState().settings.hotkeys)
+      const taken = combo ? comboConflict(current, id, combo) : null
+      if (taken) {
+        toast({ title: t('settings.hotkeys.conflict', { action: t(HOTKEY_BY_ID[taken]!.i18nKey) }), tone: 'danger' })
+        setRecording(null)
+        return
+      }
+      // Настройки пишутся целиком: сброс сочетания — это удаление ключа из карты.
+      const next = { ...useSettingsStore.getState().settings.hotkeys }
+      if (combo === null || combo === DEFAULT_COMBOS[id]) delete next[id]
+      else next[id] = combo
+      void patch({ hotkeys: next })
+      setRecording(null)
+    },
+    [patch, t]
+  )
+
   return (
     <section className="flex max-w-[720px] flex-col">
       <h2 className="type-h2 pb-2">{t('settings.section.hotkeys')}</h2>
@@ -671,13 +846,22 @@ function HotkeysSection(): React.ReactElement {
         {t('settings.hotkeys.hint')}
       </p>
       {HOTKEYS.map((hotkey) => (
-        <div key={hotkey.id} className="flex items-center justify-between gap-4 py-1.5">
-          <span className="type-body" style={{ color: 'var(--text-2)' }}>
-            {t(hotkey.i18nKey)}
-          </span>
-          <Kbd keys={formatCombo(hotkey.combo).split(' + ')} />
-        </div>
+        <HotkeyRow
+          key={hotkey.id}
+          hotkey={hotkey}
+          combo={combos[hotkey.id] ?? hotkey.combo}
+          recording={recording === hotkey.id}
+          onRecord={setRecording}
+          onAssign={assign}
+        />
       ))}
+      {Object.keys(settings.hotkeys).length > 0 && (
+        <div className="pt-4">
+          <Button variant="secondary" size="sm" onClick={() => void patch({ hotkeys: {} })}>
+            {t('settings.hotkeys.resetAll')}
+          </Button>
+        </div>
+      )}
     </section>
   )
 }

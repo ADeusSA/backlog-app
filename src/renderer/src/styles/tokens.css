@@ -139,6 +139,80 @@
   --d-drift: 20s;
 }
 
+/**
+ * Светлая тема (04 §8). Сцена #F3F4F8, поверхности — чёрные прозрачности вместо белых,
+ * bloom бледнее (opacity .18). Насыщенные роли (акцент, статусы, Metacritic) затемнены
+ * так, чтобы белый текст на заливке и сам цвет на сцене давали контраст ≥ 4.5:1 (10 §2).
+ * Переменные, собранные через color-mix из --text-1/--accent (треки, скроллбар, heat-*),
+ * пересчитываются сами и здесь не перечисляются.
+ */
+:root[data-theme='light'] {
+  color-scheme: light;
+
+  --bg-0: #f3f4f8;
+  --bg-1: #ffffff;
+  --surface-1: rgba(15, 18, 30, 0.04);
+  --surface-2: rgba(15, 18, 30, 0.07);
+  --surface-glass: rgba(255, 255, 255, 0.68);
+  --surface-glass-strong: rgba(250, 251, 254, 0.92);
+  --surface-solid: #ffffff;
+  --border-1: rgba(15, 18, 30, 0.1);
+  --border-2: rgba(15, 18, 30, 0.17);
+  --text-1: #171a24;
+  --text-2: #545b6d;
+  --text-3: #656c7d;
+  --text-disabled: #9aa0ad;
+  --overlay: rgba(20, 24, 36, 0.35);
+
+  --accent: #6a53f0;
+  --accent-hover: #5a44dd;
+  --accent-press: #4d39c4;
+  --accent-on: #ffffff;
+  --accent-soft: rgba(106, 83, 240, 0.13);
+  --success: #0d7d70;
+  --success-on: #ffffff;
+  --success-soft: rgba(13, 125, 112, 0.14);
+  --warning: #7d5800;
+  --warning-on: #ffffff;
+  --danger: #d0374f;
+  --danger-on: #ffffff;
+  --danger-soft: rgba(208, 55, 79, 0.1);
+  --primary-btn: #1c2030;
+  --primary-btn-on: #f5f6fa;
+
+  --st-wishlist: #7c46c9;
+  --st-backlog: #5a6a86;
+  --st-playing: #6a53f0;
+  --st-completed: #0d7d70;
+  --st-shelved: #7d5800;
+  --st-dropped: #d0374f;
+  --st-played: #1b6394;
+
+  --st-wishlist-on: #ffffff;
+  --st-backlog-on: #ffffff;
+  --st-playing-on: #ffffff;
+  --st-completed-on: #ffffff;
+  --st-shelved-on: #ffffff;
+  --st-dropped-on: #ffffff;
+  --st-played-on: #ffffff;
+
+  /* Затемнения лежат поверх обложек, а не поверх сцены, — остаются тёмными. */
+  --hero-scrim: linear-gradient(180deg, rgba(243, 244, 248, 0.15), var(--bg-0) 100%);
+
+  --mc-good: #2f8a3f;
+  --mc-mixed: #7d5800;
+  --mc-bad: #d0374f;
+
+  --bloom-a: #b3a6f5;
+  --bloom-b: #7fd0c4;
+  --bloom-opacity: 0.18;
+
+  --shadow-1: 0 1px 2px rgba(20, 24, 36, 0.1);
+  --shadow-2: 0 12px 28px rgba(20, 24, 36, 0.14);
+  --shadow-3: 0 24px 60px rgba(20, 24, 36, 0.18);
+  --ring-accent: 0 0 0 1px rgba(106, 83, 240, 0.55);
+}
+
 /* «Анимации: уменьшенные» — 04 §5 */
 :root[data-motion='reduced'] {
   --d-page: 200ms;

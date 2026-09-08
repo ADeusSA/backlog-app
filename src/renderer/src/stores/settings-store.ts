@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import { DEFAULT_SETTINGS, type Settings, type SettingsPatch } from '@shared/schema/settings'
 import type { ViewMode } from '@shared/constants'
 import { call } from '@/platform/api'
+import { applyTheme, watchSystemTheme } from '@/lib/theme'
 
 interface SettingsState {
   settings: Settings
@@ -34,6 +35,7 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
       window: { ...current.window, ...(patch.window ?? {}) },
       sync: { ...current.sync, ...(patch.sync ?? {}) },
       backups: { ...current.backups, ...(patch.backups ?? {}) },
+      tray: { ...current.tray, ...(patch.tray ?? {}) },
       viewByScope: { ...current.viewByScope, ...(patch.viewByScope ?? {}) },
       filterPanelByScope: { ...current.filterPanelByScope, ...(patch.filterPanelByScope ?? {}) }
     }
@@ -53,10 +55,21 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
   }
 }))
 
-/** Применение настроек к документу: язык, уровень анимаций (04 §5). */
+/** Применение настроек к документу: язык, уровень анимаций (04 §5), тема (04 §8). */
 export function applyDocumentSettings(settings: Settings): void {
   document.documentElement.lang = settings.locale
   document.documentElement.dataset['motion'] = settings.animations
+  applyTheme(settings.theme)
+}
+
+/**
+ * Слежение за системной темой: в режиме «Системная» приложение перекрашивается
+ * вместе с Windows, без перезапуска. Подписка живёт всё время работы приложения.
+ */
+export function watchTheme(): () => void {
+  return watchSystemTheme(() => {
+    if (useSettingsStore.getState().settings.theme === 'system') applyTheme('system')
+  })
 }
 
 export function useSettings(): Settings {

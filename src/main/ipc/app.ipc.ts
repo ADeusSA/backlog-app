@@ -1,8 +1,11 @@
-import { app, shell } from 'electron'
+import { app, dialog, shell } from 'electron'
+import { writeFileSync } from 'node:fs'
 import { handle } from './register'
 import { paths } from '../paths'
 import { openExternal } from '../security'
+import { getMainWindow } from '../window'
 import { getDb, hasFts5 } from '../db/connection'
+import { AppError } from '@shared/errors'
 import { log } from '../log'
 
 export function registerAppIpc(): void {
@@ -53,6 +56,27 @@ export function registerAppIpc(): void {
   handle('app.log', ({ level, message, data }) => {
     log[level](`[renderer] ${message}`, data ?? '')
     return { ok: true as const }
+  })
+
+  /**
+   * Снимок области окна в PNG — экспорт «итогов года» (10 §1). Область приходит
+   * из `getBoundingClientRect()` карточки: capturePage работает в тех же CSS-пикселях,
+   * а масштаб экрана Electron учитывает сам.
+   */
+  handle('app.capturePng', async ({ rect, fileName }) => {
+    const win = getMainWindow()
+    if (!win) throw new AppError('unknown', 'Окно недоступно')
+    const image = await win.webContents.capturePage(rect)
+    if (image.isEmpty()) throw new AppError('unknown', 'Не удалось снять изображение')
+
+    const options = {
+      defaultPath: fileName.replace(/[\\/:*?"<>|]/g, ' ').trim() || 'recap.png',
+      filters: [{ name: 'PNG', extensions: ['png'] }]
+    }
+    const result = await dialog.showSaveDialog(win, options)
+    if (result.canceled || !result.filePath) return null
+    writeFileSync(result.filePath, image.toPNG())
+    return { path: result.filePath }
   })
 
   handle('app.relaunch', () => {
