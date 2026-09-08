@@ -21,6 +21,7 @@ import { statusColor } from '@/lib/color'
 import { useSettings } from '@/stores/settings-store'
 import { useUiStore } from '@/stores/ui-store'
 import { formatActivityText } from '@/features/game/activity-text'
+import { ActivityPanel } from '@/features/sessions/activity-panel'
 import { ProfileEditDialog } from './profile-edit-dialog'
 
 /** Профиль (ТЗ 06 §1). */
@@ -125,7 +126,10 @@ export function ProfileScreen(): React.ReactElement {
           value={stats.totals.completed}
           onClick={() => void navigate({ to: '/library', search: { status: 'completed' } })}
         />
-        <Tile label={t('profile.tiles.hours')} value={Math.round(stats.totals.playtimeMinutes / 60)} />
+        <Tile
+          label={t('profile.tiles.hours')}
+          value={Math.round(stats.totals.playtimeMinutes / 60)}
+        />
         <Tile
           label={t('profile.tiles.avgRating')}
           value={stats.totals.avgRating ? stats.totals.avgRating.toFixed(1) : '—'}
@@ -152,7 +156,9 @@ export function ProfileScreen(): React.ReactElement {
           />
         ) : (
           <div className="flex flex-col justify-center">
-            <p className="type-h2 tabular">{t('profile.rings.thisYear', { count: stats.completedThisYear })}</p>
+            <p className="type-h2 tabular">
+              {t('profile.rings.thisYear', { count: stats.completedThisYear })}
+            </p>
             <button
               type="button"
               className="type-small text-left"
@@ -176,7 +182,10 @@ export function ProfileScreen(): React.ReactElement {
               variant="secondary"
               size="sm"
               onClick={() => {
-                void call('collection.random', { scope: { kind: 'library', status: 'backlog' }, filters: {} })
+                void call('collection.random', {
+                  scope: { kind: 'library', status: 'backlog' },
+                  filters: {}
+                })
                   .then((game) => {
                     if (game) void navigate({ to: '/games/$gameId', params: { gameId: game.id } })
                   })
@@ -195,8 +204,18 @@ export function ProfileScreen(): React.ReactElement {
                 className="flex w-[280px] shrink-0 gap-3 rounded-[var(--r-md)] p-3"
                 style={{ background: 'var(--surface-1)', border: '1px solid var(--border-1)' }}
               >
-                <button type="button" onClick={() => void navigate({ to: '/games/$gameId', params: { gameId: game.id } })}>
-                  <CoverImage fileName={game.coverFile} title={game.title} dominantColor={game.dominantColor} size={72} />
+                <button
+                  type="button"
+                  onClick={() =>
+                    void navigate({ to: '/games/$gameId', params: { gameId: game.id } })
+                  }
+                >
+                  <CoverImage
+                    fileName={game.coverFile}
+                    title={game.title}
+                    dominantColor={game.dominantColor}
+                    size={72}
+                  />
                 </button>
                 <div className="flex min-w-0 flex-1 flex-col gap-1">
                   <span className="truncate type-h3">{game.title}</span>
@@ -205,7 +224,9 @@ export function ProfileScreen(): React.ReactElement {
                   </span>
                   {game.lastActivityAt && (
                     <span className="type-small" style={{ color: 'var(--text-3)' }}>
-                      {t('profile.nowPlaying.lastActivity', { time: formatRelative(game.lastActivityAt) })}
+                      {t('profile.nowPlaying.lastActivity', {
+                        time: formatRelative(game.lastActivityAt)
+                      })}
                     </span>
                   )}
                   {game.resumeNote && (
@@ -260,7 +281,12 @@ export function ProfileScreen(): React.ReactElement {
                 type="button"
                 onClick={() => void navigate({ to: '/games/$gameId', params: { gameId: game.id } })}
               >
-                <CoverImage fileName={game.coverFile} title={game.title} dominantColor={game.dominantColor} size={140} />
+                <CoverImage
+                  fileName={game.coverFile}
+                  title={game.title}
+                  dominantColor={game.dominantColor}
+                  size={140}
+                />
               </button>
             ) : (
               <button
@@ -296,7 +322,10 @@ export function ProfileScreen(): React.ReactElement {
                   <TooltipTrigger asChild>
                     <button
                       type="button"
-                      style={{ width: `${(count / statusTotal) * 100}%`, background: statusColor(status) }}
+                      style={{
+                        width: `${(count / statusTotal) * 100}%`,
+                        background: statusColor(status)
+                      }}
                       onClick={() => void navigate({ to: '/library', search: { status } })}
                       aria-label={t(`statusPlural.${status}`)}
                     />
@@ -312,7 +341,11 @@ export function ProfileScreen(): React.ReactElement {
             {STATUS_ORDER.map((status) => {
               const count = stats.byStatus.find((row) => row.status === status)?.count ?? 0
               return (
-                <span key={status} className="flex items-center gap-1.5 type-small" style={{ color: 'var(--text-2)' }}>
+                <span
+                  key={status}
+                  className="flex items-center gap-1.5 type-small"
+                  style={{ color: 'var(--text-2)' }}
+                >
                   <StatusDot status={status} size="sm" />
                   {t(`statusPlural.${status}`)} <span className="tabular">{count}</span>
                 </span>
@@ -386,7 +419,9 @@ export function ProfileScreen(): React.ReactElement {
                 <button
                   type="button"
                   className="flex w-full items-center gap-2 rounded-[var(--r-sm)] px-2 py-1 text-left hover:bg-[var(--surface-1)]"
-                  onClick={() => void navigate({ to: '/companies/$companyId', params: { companyId: row.id } })}
+                  onClick={() =>
+                    void navigate({ to: '/companies/$companyId', params: { companyId: row.id } })
+                  }
                 >
                   <span className="min-w-0 flex-1 truncate type-body">{row.name}</span>
                   <span className="type-small tabular" style={{ color: 'var(--text-2)' }}>
@@ -405,12 +440,18 @@ export function ProfileScreen(): React.ReactElement {
 
         <CollapsibleSection title={t('profile.stats.hours')} storageKey="p.hours">
           <div className="flex flex-wrap gap-6 pb-2">
-            <Stat label={t('profile.stats.hours.total')} value={formatPlaytime(stats.totals.playtimeMinutes, true)} />
+            <Stat
+              label={t('profile.stats.hours.total')}
+              value={formatPlaytime(stats.totals.playtimeMinutes, true)}
+            />
             <Stat
               label={t('profile.stats.hours.avgPerGame')}
               value={
                 stats.totals.completed > 0
-                  ? formatPlaytime(Math.round(stats.totals.playtimeMinutes / stats.totals.completed), true)
+                  ? formatPlaytime(
+                      Math.round(stats.totals.playtimeMinutes / stats.totals.completed),
+                      true
+                    )
                   : '—'
               }
             />
@@ -421,9 +462,16 @@ export function ProfileScreen(): React.ReactElement {
                 <button
                   type="button"
                   className="flex w-full items-center gap-2 rounded-[var(--r-sm)] px-2 py-1 text-left hover:bg-[var(--surface-1)]"
-                  onClick={() => void navigate({ to: '/games/$gameId', params: { gameId: game.id } })}
+                  onClick={() =>
+                    void navigate({ to: '/games/$gameId', params: { gameId: game.id } })
+                  }
                 >
-                  <CoverImage fileName={game.coverFile} title={game.title} dominantColor={game.dominantColor} size={28} />
+                  <CoverImage
+                    fileName={game.coverFile}
+                    title={game.title}
+                    dominantColor={game.dominantColor}
+                    size={28}
+                  />
                   <span className="min-w-0 flex-1 truncate type-body">{game.title}</span>
                   <span className="type-small tabular" style={{ color: 'var(--text-2)' }}>
                     {formatPlaytime(game.playtimeMinutes ?? 0, true)}
@@ -444,10 +492,17 @@ export function ProfileScreen(): React.ReactElement {
           />
         </CollapsibleSection>
 
-        <CollapsibleSection title={t('profile.stats.activity')} defaultOpen={false} storageKey="p.activity">
-          <p className="type-small" style={{ color: 'var(--text-3)' }}>
-            {t('profile.stats.activity.soon')}
-          </p>
+        {/*
+          9. Активность — карта по дням за 12 месяцев и стрики (06 §1.9).
+          Ключ хранения новый: под старым у всех уже записано «свёрнуто» — секция была
+          заглушкой «появится в следующей версии», и её сворачивали сразу же.
+        */}
+        <CollapsibleSection
+          title={t('profile.stats.activity')}
+          defaultOpen
+          storageKey="p.activityMap"
+        >
+          <ActivityPanel />
         </CollapsibleSection>
       </section>
 
@@ -472,10 +527,16 @@ export function ProfileScreen(): React.ReactElement {
               remaining: achievements.xpToNextLevel
             })}
           </p>
-          <div className="h-1.5 w-full overflow-hidden rounded-[var(--r-pill)]" style={{ background: 'var(--track)' }}>
+          <div
+            className="h-1.5 w-full overflow-hidden rounded-[var(--r-pill)]"
+            style={{ background: 'var(--track)' }}
+          >
             <div
               className="h-full rounded-[var(--r-pill)]"
-              style={{ width: `${Math.round(achievements.levelProgress * 100)}%`, background: 'var(--accent)' }}
+              style={{
+                width: `${Math.round(achievements.levelProgress * 100)}%`,
+                background: 'var(--accent)'
+              }}
             />
           </div>
           <div className="flex flex-wrap gap-2">
@@ -508,7 +569,11 @@ export function ProfileScreen(): React.ReactElement {
               style={{ background: 'var(--surface-1)', border: '1px solid var(--border-1)' }}
               onClick={() => void navigate({ to: '/lists/$listId', params: { listId: list.id } })}
             >
-              <ProgressRing done={list.completedCount} total={Math.max(1, list.gameCount)} size={40} />
+              <ProgressRing
+                done={list.completedCount}
+                total={Math.max(1, list.gameCount)}
+                size={40}
+              />
               <span className="min-w-0 flex-1">
                 <span className="block truncate type-h3">{list.name}</span>
                 <span className="block type-small" style={{ color: 'var(--text-2)' }}>
@@ -520,7 +585,11 @@ export function ProfileScreen(): React.ReactElement {
           <button
             type="button"
             className="flex items-center justify-center gap-2 rounded-[var(--r-md)] p-3 type-body"
-            style={{ background: 'var(--surface-1)', border: '1px dashed var(--border-2)', color: 'var(--text-2)' }}
+            style={{
+              background: 'var(--surface-1)',
+              border: '1px dashed var(--border-2)',
+              color: 'var(--text-2)'
+            }}
             onClick={() => void navigate({ to: '/lists' })}
           >
             <ListPlus size={16} strokeWidth={1.75} />
@@ -548,7 +617,8 @@ export function ProfileScreen(): React.ReactElement {
                     className="truncate"
                     style={{ color: 'var(--text-1)' }}
                     onClick={() =>
-                      entry.gameId && void navigate({ to: '/games/$gameId', params: { gameId: entry.gameId } })
+                      entry.gameId &&
+                      void navigate({ to: '/games/$gameId', params: { gameId: entry.gameId } })
                     }
                   >
                     {entry.gameTitle}
@@ -631,21 +701,35 @@ function BarList({
   items: Array<{ key: string; label: string; value: number; hint?: string | undefined }>
 }): React.ReactElement {
   const max = Math.max(1, ...items.map((item) => item.value))
-  if (items.length === 0) return <span className="type-small" style={{ color: 'var(--text-3)' }}>—</span>
+  if (items.length === 0)
+    return (
+      <span className="type-small" style={{ color: 'var(--text-3)' }}>
+        —
+      </span>
+    )
   return (
     <ul className="flex flex-col gap-1.5">
       {items.map((item) => (
         <li key={item.key} className="flex items-center gap-3">
-          <span className="w-[110px] shrink-0 truncate type-small" style={{ color: 'var(--text-2)' }}>
+          <span
+            className="w-[110px] shrink-0 truncate type-small"
+            style={{ color: 'var(--text-2)' }}
+          >
             {item.label}
           </span>
-          <span className="h-2 min-w-0 flex-1 overflow-hidden rounded-[var(--r-pill)]" style={{ background: 'var(--track)' }}>
+          <span
+            className="h-2 min-w-0 flex-1 overflow-hidden rounded-[var(--r-pill)]"
+            style={{ background: 'var(--track)' }}
+          >
             <span
               className="block h-full rounded-[var(--r-pill)]"
               style={{ width: `${(item.value / max) * 100}%`, background: 'var(--accent)' }}
             />
           </span>
-          <span className="w-[64px] shrink-0 text-right type-small tabular" style={{ color: 'var(--text-2)' }}>
+          <span
+            className="w-[64px] shrink-0 text-right type-small tabular"
+            style={{ color: 'var(--text-2)' }}
+          >
             {item.value}
             {item.hint ? ` · ${item.hint}` : ''}
           </span>

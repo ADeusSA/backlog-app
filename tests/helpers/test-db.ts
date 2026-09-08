@@ -1,6 +1,7 @@
 import Database from 'better-sqlite3'
 import init from '../../src/main/db/migrations/0001_init.sql?raw'
 import seed from '../../src/main/db/migrations/0002_seed.sql?raw'
+import sessions from '../../src/main/db/migrations/0003_sessions.sql?raw'
 
 /** База в памяти с применёнными миграциями — для юнит- и интеграционных тестов. */
 export function createTestDb(): Database.Database {
@@ -8,6 +9,7 @@ export function createTestDb(): Database.Database {
   db.pragma('foreign_keys = ON')
   db.exec(init)
   db.exec(seed)
+  db.exec(sessions)
   return db
 }
 
@@ -81,4 +83,35 @@ export function insertUserGame(
     NOW,
     NOW
   )
+}
+
+/** Сессия журнала (02 §3.9) — фикстура для стриков и «Совы». */
+export function insertSession(
+  db: Database.Database,
+  fields: {
+    gameId: string
+    playedOn: string
+    minutes: number
+    startedAtTime?: string | null
+    playthroughId?: string | null
+    note?: string | null
+  }
+): string {
+  const id = testId('s')
+  db.prepare(
+    `INSERT INTO play_sessions(id, game_id, playthrough_id, played_on, started_at_time, minutes, note,
+                               created_at, updated_at)
+     VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)`
+  ).run(
+    id,
+    fields.gameId,
+    fields.playthroughId ?? null,
+    fields.playedOn,
+    fields.startedAtTime ?? null,
+    fields.minutes,
+    fields.note ?? null,
+    NOW,
+    NOW
+  )
+  return id
 }

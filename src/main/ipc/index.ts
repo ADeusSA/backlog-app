@@ -13,6 +13,7 @@ import { registerCatalogIpc } from './catalog.ipc'
 import { registerImagesIpc } from './images.ipc'
 import { registerProvidersIpc } from './providers.ipc'
 import { registerProfileIpc } from './profile.ipc'
+import { registerSessionsIpc } from './sessions.ipc'
 import { registerAchievementsIpc } from './achievements.ipc'
 import { registerSearchIpc } from './search.ipc'
 import { registerPresetsIpc } from './presets.ipc'
@@ -34,6 +35,7 @@ export function registerAllIpc(): void {
   registerImagesIpc()
   registerProvidersIpc()
   registerProfileIpc()
+  registerSessionsIpc()
   registerAchievementsIpc()
   registerSearchIpc()
   registerPresetsIpc()

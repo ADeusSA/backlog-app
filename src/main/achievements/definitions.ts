@@ -17,7 +17,10 @@ export interface AchievementDefinition {
   description: string
   icon: string
   levels: AchievementLevel[]
-  /** Требует журнала сессий — активируется в итерации 2 (ТЗ 09 §3). */
+  /**
+   * Достижение показано, но ещё не считается. Сейчас таких нет: «Стрик» и «Сова»
+   * заработали вместе с журналом сессий (10 §1, итерация 2).
+   */
   comingSoon?: boolean
   /** Параметризованные («серийный», «жанровый гурман») генерируются по данным. */
   parameterized?: 'series' | 'genre'
@@ -72,8 +75,7 @@ export const ACHIEVEMENTS: AchievementDefinition[] = [
     title: 'Стрик',
     description: 'Дней подряд с игровой сессией: {{threshold}}',
     icon: 'flame',
-    levels: levels(7, 30, 100),
-    comingSoon: true
+    levels: levels(7, 30, 100)
   },
   {
     key: 'retro',
@@ -174,8 +176,7 @@ export const ACHIEVEMENTS: AchievementDefinition[] = [
     title: 'Сова',
     description: 'Двадцать сессий, начатых после 23:00',
     icon: 'moon',
-    levels: levels(20),
-    comingSoon: true
+    levels: levels(20)
   },
   {
     key: 'comeback',

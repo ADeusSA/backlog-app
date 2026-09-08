@@ -295,7 +295,7 @@ CREATE INDEX idx_user_game_added ON user_game(added_at);
 CREATE INDEX idx_user_game_finished ON user_game(finished_at);
 CREATE INDEX idx_user_game_activity ON user_game(last_activity_at);
 
--- 3.9 Прохождения и сессии (схема — итерация 1, UI — итерация 2) ------------------
+-- 3.9 Прохождения и сессии (реализовано, ADR 0008; `started_at_time` добавлено миграцией 0003) --
 CREATE TABLE playthroughs (
   id               TEXT PRIMARY KEY,
   game_id          TEXT NOT NULL REFERENCES games(id) ON DELETE CASCADE,
@@ -320,6 +320,7 @@ CREATE TABLE play_sessions (
   game_id         TEXT NOT NULL REFERENCES games(id) ON DELETE CASCADE,
   playthrough_id  TEXT REFERENCES playthroughs(id) ON DELETE SET NULL,
   played_on       TEXT NOT NULL,       -- 'YYYY-MM-DD'
+  started_at_time TEXT,                -- 'HH:MM', необязательно (миграция 0003, ADR 0008)
   minutes         INTEGER NOT NULL CHECK (minutes > 0),
   note            TEXT,
   created_at      TEXT NOT NULL,
@@ -531,6 +532,6 @@ LIMIT :limit OFFSET :offset;
 | external_ids | схема да, запись нет | заполняется импортом (итерация 3) |
 | field_provenance | да (только `provider = manual`, `locked = 1`) | полноценно — итерация 3 |
 | filter_presets | да | |
-| activity_log | да (запись + «последняя активность» в профиле) | heatmap/итоги года — итерация 2 |
-| user_achievements | да | определения достижений — в коде (документ 09); `streak`/`night_owl` считаются с итерации 2 |
+| activity_log | да (запись + «последняя активность» в профиле) | heatmap строится по `play_sessions` (ADR 0008); итоги года — позже |
+| user_achievements | да | определения достижений — в коде (документ 09); `streak`/`night_owl` считаются с появлением журнала сессий (ADR 0008) |
 | search_index (FTS5) | да | глобальный поиск / Ctrl+K |

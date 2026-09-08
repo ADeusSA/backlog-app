@@ -14,6 +14,7 @@ import {
 } from '../db/repositories/user-game.repo'
 import { addTagsToGames, ensureTag, getTagsForGame, removeTagsFromGames, setGameTags } from '../db/repositories/taxonomy.repo'
 import { logActivity } from './activity.service'
+import { applySaveSession, syncGamePlaytime } from './sessions.service'
 import { AppError } from '@shared/errors'
 import { MASTERABLE_STATUSES, RATEABLE_STATUSES } from '@shared/constants'
 import type { GameStatus } from '@shared/constants'
@@ -118,6 +119,7 @@ const PATCH_COLUMN_MAP: Record<keyof UserGamePatch, string> = {
   priority: 'priority',
   rating: 'rating',
   playtimeMinutes: 'playtime_minutes',
+  playtimeMode: 'playtime_mode',
   platformId: 'platform_id',
   ownership: 'ownership',
   store: 'store',
@@ -151,6 +153,10 @@ export function applyUserGamePatch(conn: Db, gameId: string, patch: UserGamePatc
   fields.updated_at = nowTs
   setUserGameFields(conn, gameId, fields)
 
+  // Переключение на «часы по журналу» сразу подменяет число суммой сессий,
+  // иначе пользователь увидел бы старую ручную цифру до первой новой сессии.
+  if (patch.playtimeMode === 'sessions') syncGamePlaytime(conn, gameId, nowTs)
+
   if (patch.rating !== undefined) logActivity(conn, 'rating_set', { gameId, payload: { rating: patch.rating } })
   if (patch.playtimeMinutes !== undefined) {
     logActivity(conn, 'playtime_set', { gameId, payload: { playtimeMinutes: patch.playtimeMinutes } })
@@ -165,11 +171,23 @@ export function patchUserGame(gameId: string, patch: UserGamePatch): UserGameDto
   return write(['user_game', 'games'], (conn) => applyUserGamePatch(conn, gameId, patch))
 }
 
-/** Чистое добавление времени к уже открытому соединению (для юнит-тестов и сервиса). */
+/**
+ * Чистое добавление времени к уже открытому соединению (для юнит-тестов и сервиса).
+ *
+ * В режиме `sessions` часы принадлежат журналу, поэтому быстрые кнопки «+15 м / +1 ч / +2 ч»
+ * и «+ время» в профиле не правят число, а записывают сессию на сегодня — итог пересчитается
+ * из журнала сам (02 §3.8, 06 §6.2 п.4).
+ */
 export function applyAddPlaytime(conn: Db, gameId: string, minutes: number): UserGameDto {
   ensureUserGame(conn, gameId)
   const existing = getUserGameRow(conn, gameId)
   if (!existing) throw new AppError('unknown', 'Не удалось создать пользовательские данные игры')
+
+  if (existing.playtime_mode === 'sessions' && minutes > 0) {
+    applySaveSession(conn, { gameId, playedOn: today(), minutes })
+    return getUserGameDto(conn, gameId)!
+  }
+
   const total = Math.max(0, existing.playtime_minutes + minutes)
   const nowTs = now()
   setUserGameFields(conn, gameId, { playtime_minutes: total, last_activity_at: nowTs, updated_at: nowTs })
@@ -178,7 +196,7 @@ export function applyAddPlaytime(conn: Db, gameId: string, minutes: number): Use
 }
 
 export function addPlaytime(gameId: string, minutes: number): UserGameDto {
-  return write(['user_game', 'games'], (conn) => applyAddPlaytime(conn, gameId, minutes))
+  return write(['user_game', 'games', 'play_sessions'], (conn) => applyAddPlaytime(conn, gameId, minutes))
 }
 
 export function addToLibrary(gameIds: string[], status: GameStatus): void {

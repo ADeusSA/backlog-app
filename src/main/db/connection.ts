@@ -10,10 +10,12 @@ import { newId, now } from './utils'
 
 import migration0001 from './migrations/0001_init.sql?raw'
 import migration0002 from './migrations/0002_seed.sql?raw'
+import migration0003 from './migrations/0003_sessions.sql?raw'
 
 const MIGRATIONS: Array<{ version: number; name: string; sql: string }> = [
   { version: 1, name: '0001_init', sql: migration0001 },
-  { version: 2, name: '0002_seed', sql: migration0002 }
+  { version: 2, name: '0002_seed', sql: migration0002 },
+  { version: 3, name: '0003_sessions', sql: migration0003 }
 ]
 
 export type Db = Database.Database

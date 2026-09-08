@@ -14,7 +14,7 @@ const MIGRATIONS_DIR = path.join(__dirname, 'migrations')
 export function createTestDb(): TestDb {
   const db = new Database(':memory:')
   db.pragma('foreign_keys = ON')
-  for (const file of ['0001_init.sql', '0002_seed.sql']) {
+  for (const file of ['0001_init.sql', '0002_seed.sql', '0003_sessions.sql']) {
     const sql = fs.readFileSync(path.join(MIGRATIONS_DIR, file), 'utf8')
     db.exec(sql)
   }

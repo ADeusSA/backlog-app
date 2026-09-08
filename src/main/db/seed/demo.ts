@@ -252,6 +252,110 @@ function daysAgo(days: number): string {
   return date.toISOString()
 }
 
+/** Дата 'YYYY-MM-DD' N дней назад — журнал сессий хранит именно дни (02 §3.9). */
+function dayAgo(days: number): string {
+  const date = new Date()
+  date.setDate(date.getDate() - days)
+  const pad = (n: number): string => String(n).padStart(2, '0')
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`
+}
+
+/**
+ * Линейный конгруэнтный генератор: демо-журнал должен выглядеть живым, но
+ * оставаться одинаковым при каждом заполнении — иначе скриншоты и проверки «пляшут».
+ */
+function makeRandom(seed: number): () => number {
+  let state = seed
+  return () => {
+    state = (state * 1664525 + 1013904223) % 4294967296
+    return state / 4294967296
+  }
+}
+
+/** Игры, по которым в демо есть сессии: те, в которые «играли». */
+const SESSION_TITLES = [
+  'Elden Ring',
+  'Hades',
+  'Hollow Knight',
+  'Ведьмак 3: Дикая Охота',
+  'Cyberpunk 2077',
+  'Dark Souls'
+]
+
+/**
+ * Журнал сессий за последние 10 месяцев + два прохождения одной игры (06 §1.9).
+ * Без него карта активности в профиле у нового пользователя пустая, и непонятно,
+ * что она вообще умеет.
+ */
+function seedSessions(db: Db, idByTitle: Map<string, string>): void {
+  const timestamp = now()
+  const gameIds = SESSION_TITLES.map((title) => idByTitle.get(title)).filter(
+    (id): id is string => Boolean(id)
+  )
+  if (gameIds.length === 0) return
+
+  const random = makeRandom(20260908)
+  const insert = db.prepare(
+    `INSERT INTO play_sessions(id, game_id, playthrough_id, played_on, started_at_time, minutes, note,
+                               created_at, updated_at)
+     VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)`
+  )
+
+  // Два прохождения первой игры: обычное и NG+ — сессии последних недель идут в NG+.
+  const heroId = gameIds[0]!
+  const firstRun = newId()
+  const newGamePlus = newId()
+  const insertPlaythrough = db.prepare(
+    `INSERT INTO playthroughs(id, game_id, number, title, status, is_replay, is_mastered, rating,
+                              playtime_minutes, started_at, finished_at, notes, created_at, updated_at)
+     VALUES(?, ?, ?, ?, ?, ?, ?, ?, 0, ?, ?, ?, ?, ?)`
+  )
+  insertPlaythrough.run(
+    firstRun, heroId, 1, 'Первое прохождение', 'completed', 0, 0, 9,
+    dayAgo(280), dayAgo(150), 'Обычная концовка', timestamp, timestamp
+  )
+  insertPlaythrough.run(
+    newGamePlus, heroId, 2, 'NG+', 'in_progress', 1, 0, null,
+    dayAgo(60), null, 'Иду за платиной', timestamp, timestamp
+  )
+
+  let created = 0
+  for (let ago = 300; ago >= 0; ago -= 1) {
+    // Плотность растёт к сегодняшнему дню, плюс гарантированная серия из девяти дней.
+    const streakDay = ago <= 8
+    const chance = ago < 60 ? 0.45 : ago < 180 ? 0.3 : 0.18
+    if (!streakDay && random() > chance) continue
+
+    const sessionsToday = random() < 0.2 ? 2 : 1
+    for (let i = 0; i < sessionsToday; i += 1) {
+      const gameId = gameIds[Math.floor(random() * gameIds.length)]!
+      const minutes = 30 + Math.floor(random() * 5) * 30
+      // Часть сессий — с временем начала: по нему считается достижение «Сова».
+      const hour = random() < 0.15 ? 23 : 17 + Math.floor(random() * 5)
+      const startedAt = random() < 0.6 ? `${String(hour % 24).padStart(2, '0')}:00` : null
+      const playthroughId = gameId === heroId ? (ago > 60 ? firstRun : newGamePlus) : null
+      insert.run(newId(), gameId, playthroughId, dayAgo(ago), startedAt, minutes, null, timestamp, timestamp)
+      created += 1
+    }
+  }
+
+  // Часы прохождений — сумма их сессий (правило `sessions.service.syncPlaythroughPlaytime`).
+  for (const playthroughId of [firstRun, newGamePlus]) {
+    db.prepare(
+      `UPDATE playthroughs SET playtime_minutes =
+         (SELECT COALESCE(SUM(minutes), 0) FROM play_sessions WHERE playthrough_id = ?)
+       WHERE id = ?`
+    ).run(playthroughId, playthroughId)
+  }
+
+  if (created > 0) {
+    db.prepare(
+      `INSERT INTO activity_log(id, happened_at, type, game_id, payload_json)
+       VALUES(?, ?, 'session_logged', ?, ?)`
+    ).run(newId(), timestamp, heroId, JSON.stringify({ minutes: 60, playedOn: dayAgo(0) }))
+  }
+}
+
 function baseGameInput(demo: DemoGame, companyIds: string[], seriesIds: string[]): GameInput {
   const developerId = companyIds[demo.developer]
   const publisherId = companyIds[demo.publisher]
@@ -324,7 +428,9 @@ export function seedDemoData(): { games: number } {
       'user_game',
       'lists',
       'list_items',
-      'activity_log'
+      'activity_log',
+      'playthroughs',
+      'play_sessions'
     ],
     (db) => {
       const companyIds = COMPANIES.map((company) =>
@@ -365,6 +471,8 @@ export function seedDemoData(): { games: number } {
           ).run(listId, gameId, position + 1, timestamp)
         })
       }
+
+      seedSessions(db, idByTitle)
 
       return { games: GAMES.length }
     }

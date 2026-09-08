@@ -1,5 +1,6 @@
 import type { Database } from 'better-sqlite3'
 import { MAIN_LINE_CATEGORIES } from '@shared/constants'
+import { longestStreak } from '../services/sessions-stats'
 import { ACHIEVEMENTS, type AchievementDefinition } from './definitions'
 
 /**
@@ -149,9 +150,21 @@ export function computeAchievements(db: Database): AchievementProgress[] {
       : 0
   )
 
-  // Заглушки итерации 2 — прогресс не считается (ТЗ 09 §3)
-  push(byKey('streak'), 0)
-  push(byKey('night_owl'), 0)
+  // Стрик: самая длинная серия дней подряд с сессией. Берём именно лучшую за всю историю —
+  // достижения не отбираются, когда серия прервалась (09 §1).
+  const playedDays = (
+    db.prepare('SELECT DISTINCT played_on AS d FROM play_sessions ORDER BY d ASC').all() as Array<{
+      d: string
+    }>
+  ).map((row) => row.d)
+  push(byKey('streak'), longestStreak(playedDays))
+
+  // Сова: сессии, начатые после 23:00. Сессии без указанного времени не считаются —
+  // время начала необязательное (09 §3: «если время сессий ведётся»).
+  push(
+    byKey('night_owl'),
+    one(db, "SELECT COUNT(*) AS v FROM play_sessions WHERE started_at_time >= '23:00'")
+  )
 
   // Серийный: пройдены все основные игры серии (≥ 3 игр)
   const seriesRows = db

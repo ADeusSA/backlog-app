@@ -123,6 +123,10 @@ export type ListSortMode = (typeof LIST_SORT_MODES)[number]
 export const PLAYTIME_MODES = ['manual', 'sessions'] as const
 export type PlaytimeMode = (typeof PLAYTIME_MODES)[number]
 
+/** Статусы прохождения (02 §3.9). */
+export const PLAYTHROUGH_STATUSES = ['in_progress', 'completed', 'dropped'] as const
+export type PlaythroughStatus = (typeof PLAYTHROUGH_STATUSES)[number]
+
 /** Приоритет игры в бэклоге. */
 export const PRIORITIES = [0, 1, 2, 3] as const
 export type Priority = (typeof PRIORITIES)[number]
@@ -254,4 +258,4 @@ export const EXTERNAL_PROVIDERS = [
 export type ExternalProvider = (typeof EXTERNAL_PROVIDERS)[number]
 
 /** Текущая версия схемы БД (02 §6). */
-export const SCHEMA_VERSION = 2
+export const SCHEMA_VERSION = 3

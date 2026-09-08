@@ -171,6 +171,7 @@ export function getAchievementsSummary(db: Database = getDb()): AchievementsSumm
  */
 const WATCHED_TABLES = new Set([
   'user_game',
+  'play_sessions',
   'games',
   'game_genres',
   'series_games',

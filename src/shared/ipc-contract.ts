@@ -41,7 +41,14 @@ import {
   settingsSchema,
   syncStateSchema
 } from './schema/settings'
-import { hexColorSchema, idSchema } from './schema/common'
+import {
+  activitySummarySchema,
+  playSessionDtoSchema,
+  playthroughDtoSchema,
+  playthroughInputSchema,
+  sessionInputSchema
+} from './schema/sessions'
+import { dateSchema, hexColorSchema, idSchema } from './schema/common'
 import { GAME_STATUSES, IMAGE_KINDS, PLATFORM_FAMILIES } from './constants'
 
 const nothing = z.void()
@@ -177,6 +184,16 @@ export const channels = {
   'images.delete': { input: z.object({ id: idSchema }), output: ok },
   'images.gc': { input: nothing, output: z.object({ removed: z.number().int(), freedBytes: z.number().int() }) },
 
+  /* ------------------------------------- журнал сессий и прохождения */
+  'sessions.list': { input: z.object({ gameId: idSchema.optional(), playthroughId: idSchema.optional(), from: dateSchema.optional(), to: dateSchema.optional(), limit: z.number().int().min(1).max(500).default(100), offset: z.number().int().min(0).default(0) }), output: z.array(playSessionDtoSchema) },
+  'sessions.save': { input: sessionInputSchema, output: playSessionDtoSchema },
+  'sessions.delete': { input: z.object({ id: idSchema }), output: ok },
+  // Свод для карты активности: дни окна + стрики по всей истории (06 §1.9).
+  'sessions.activity': { input: z.object({ from: dateSchema, to: dateSchema, gameId: idSchema.optional() }), output: activitySummarySchema },
+  'playthroughs.list': { input: z.object({ gameId: idSchema }), output: z.array(playthroughDtoSchema) },
+  'playthroughs.save': { input: playthroughInputSchema, output: playthroughDtoSchema },
+  'playthroughs.delete': { input: z.object({ id: idSchema }), output: ok },
+
   /* ------------------------------------------------------- профиль */
   'profile.get': { input: nothing, output: profileDtoSchema },
   'profile.patch': { input: profilePatchSchema, output: profileDtoSchema },
@@ -242,6 +259,8 @@ export type AppEventType = AppEvent['type']
 export const TABLE_TO_QUERY_KEYS: Record<string, string[]> = {
   games: ['collection', 'game', 'catalog', 'series', 'companies', 'stats', 'search'],
   user_game: ['collection', 'game', 'stats', 'profile', 'achievements', 'activity', 'lists', 'series', 'companies'],
+  play_sessions: ['sessions', 'game', 'collection', 'profile', 'stats', 'achievements', 'activity'],
+  playthroughs: ['playthroughs', 'sessions', 'game'],
   lists: ['lists', 'collection', 'profile', 'achievements'],
   list_items: ['lists', 'collection', 'game', 'profile'],
   series: ['series', 'collection', 'game', 'catalog'],

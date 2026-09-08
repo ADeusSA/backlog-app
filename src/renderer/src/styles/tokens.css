@@ -77,6 +77,13 @@
   --scrollbar-thumb-hover: color-mix(in srgb, var(--text-1) 30%, transparent);
   --shimmer: color-mix(in srgb, var(--text-1) 8%, transparent);
 
+  /* Карта активности профиля (06 §1.9): пять ступеней от пустого дня к самому плотному */
+  --heat-0: color-mix(in srgb, var(--text-1) 7%, transparent);
+  --heat-1: color-mix(in srgb, var(--accent) 30%, transparent);
+  --heat-2: color-mix(in srgb, var(--accent) 55%, transparent);
+  --heat-3: color-mix(in srgb, var(--accent) 78%, transparent);
+  --heat-4: var(--accent);
+
   /* Metacritic (04 §2.3) — единственное место с зелёным */
   --mc-good: #5dca5d;
   --mc-mixed: #e8b85a;

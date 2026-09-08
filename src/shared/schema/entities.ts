@@ -268,6 +268,8 @@ export const userGamePatchSchema = z
     priority: z.number().int().min(0).max(3).optional(),
     rating: z.number().int().min(1).max(10).nullable().optional(),
     playtimeMinutes: z.number().int().min(0).max(100000 * 60).optional(),
+    /** Переключение на `sessions` пересчитывает часы по журналу (02 §3.8). */
+    playtimeMode: z.enum(PLAYTIME_MODES).optional(),
     platformId: idSchema.nullable().optional(),
     ownership: z.enum(OWNERSHIPS).optional(),
     store: z.string().max(40).nullable().optional(),

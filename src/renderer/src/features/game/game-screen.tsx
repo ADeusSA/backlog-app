@@ -18,6 +18,8 @@ import { call } from '@/platform/api'
 import { formatDate, formatPlaytime, formatRelative } from '@/lib/format'
 import { comboFromEvent, isTypingTarget } from '@/lib/hotkeys'
 import { useSettings } from '@/stores/settings-store'
+import { PlaythroughsSection } from '@/features/sessions/playthroughs-section'
+import { SessionsSection } from '@/features/sessions/sessions-section'
 import { Hero } from './hero'
 import { UserPanel } from './user-panel'
 import { useGameBloom } from './use-game-bloom'
@@ -234,6 +236,14 @@ export function GameScreen(): React.ReactElement {
                 onOpen={(id) => void navigate({ to: '/games/$gameId', params: { gameId: id } })}
               />
             </section>
+          )}
+
+          {/* Прохождения и журнал сессий — только для игр из библиотеки (10 §1, итерация 2). */}
+          {game.userGame && (
+            <>
+              <PlaythroughsSection gameId={game.id} />
+              <SessionsSection gameId={game.id} />
+            </>
           )}
 
           {game.activity.length > 0 && (

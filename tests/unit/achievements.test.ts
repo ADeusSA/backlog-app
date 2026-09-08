@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import type { Database } from 'better-sqlite3'
 import { computeAchievements, computeXp } from '../../src/main/achievements/compute'
 import { levelFromXp, levelTitle } from '../../src/main/achievements/definitions'
-import { createTestDb, insertGame, insertUserGame, NOW } from '../helpers/test-db'
+import { createTestDb, insertGame, insertSession, insertUserGame, NOW } from '../helpers/test-db'
 
 function progressOf(db: Database, key: string): number {
   const items = computeAchievements(db)
@@ -97,11 +97,35 @@ describe('достижения (ТЗ 09)', () => {
     expect(levelTitle(60).key).toBe('level.title.50')
   })
 
-  it('достижения на журнале сессий помечены «скоро» и не дают прогресса', () => {
+  it('достижения на журнале сессий больше не «скоро» (итерация 2)', () => {
     const db = createTestDb()
     const items = computeAchievements(db)
-    const streak = items.find((a) => a.baseKey === 'streak')
-    expect(streak?.definition.comingSoon).toBe(true)
-    expect(streak?.progress).toBe(0)
+    for (const key of ['streak', 'night_owl']) {
+      const item = items.find((a) => a.baseKey === key)
+      expect(item?.definition.comingSoon, key).toBeUndefined()
+      expect(item?.progress, key).toBe(0)
+    }
+  })
+
+  it('«Стрик» берёт лучшую серию дней подряд с сессией', () => {
+    const db = createTestDb()
+    const id = '019f0000-0000-7000-8000-000000000501'
+    insertGame(db, { id, title: 'Streaky' })
+    // 4 дня подряд, пропуск, ещё 2 дня — в зачёт идут четыре
+    for (const day of ['2026-03-01', '2026-03-02', '2026-03-03', '2026-03-04', '2026-03-08', '2026-03-09']) {
+      insertSession(db, { gameId: id, playedOn: day, minutes: 60 })
+    }
+    expect(progressOf(db, 'streak')).toBe(4)
+  })
+
+  it('«Сова» считает только сессии с указанным временем после 23:00', () => {
+    const db = createTestDb()
+    const id = '019f0000-0000-7000-8000-000000000502'
+    insertGame(db, { id, title: 'Night' })
+    insertSession(db, { gameId: id, playedOn: '2026-03-01', minutes: 60, startedAtTime: '23:30' })
+    insertSession(db, { gameId: id, playedOn: '2026-03-02', minutes: 60, startedAtTime: '23:00' })
+    insertSession(db, { gameId: id, playedOn: '2026-03-03', minutes: 60, startedAtTime: '18:00' })
+    insertSession(db, { gameId: id, playedOn: '2026-03-04', minutes: 60 })
+    expect(progressOf(db, 'night_owl')).toBe(2)
   })
 })

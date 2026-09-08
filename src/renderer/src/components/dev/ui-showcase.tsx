@@ -31,6 +31,7 @@ import {
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu'
 import { EmptyState } from '@/components/ui/empty-state'
+import { Heatmap, type HeatmapDay, type HeatmapLabels } from '@/components/ui/heatmap'
 import { CoverImage } from '@/components/ui/image'
 import { Input, Textarea } from '@/components/ui/input'
 import { Kbd } from '@/components/ui/kbd'
@@ -223,6 +224,17 @@ export function UiShowcase(): React.ReactElement {
           <ProgressRing done={7} total={12} size={40} />
           <ProgressRing done={3} total={10} size={24} showValue={false} />
         </Row>
+      </Block>
+
+      <Block title="Карта активности (heatmap)">
+        <Heatmap
+          from={DEMO_HEATMAP.from}
+          to={DEMO_HEATMAP.to}
+          days={DEMO_HEATMAP.days}
+          metric="minutes"
+          labels={DEMO_HEATMAP_LABELS}
+          selected={DEMO_HEATMAP.days[10]?.date ?? null}
+        />
       </Block>
 
       <Block title="Обложки и плашки">
@@ -438,6 +450,30 @@ function Block({ title, children }: { title: string; children: React.ReactNode }
 
 function Row({ children }: { children: React.ReactNode }): React.ReactElement {
   return <div className="flex flex-wrap items-center gap-3">{children}</div>
+}
+
+/** Год «сессий» для витрины: детерминированная синусоида, чтобы видеть все пять ступеней. */
+const DEMO_HEATMAP = (() => {
+  const to = new Date()
+  const from = new Date(to.getTime() - 364 * 24 * 3600 * 1000)
+  const iso = (date: Date): string => date.toISOString().slice(0, 10)
+  const days: HeatmapDay[] = []
+  for (let i = 0; i < 365; i += 1) {
+    const date = new Date(from.getTime() + i * 24 * 3600 * 1000)
+    const wave = Math.sin(i / 9) + Math.sin(i / 31)
+    if (wave < 0.2) continue
+    days.push({ date: iso(date), minutes: Math.round(wave * 120), sessions: wave > 1.4 ? 2 : 1 })
+  }
+  return { from: iso(from), to: iso(to), days }
+})()
+
+const DEMO_HEATMAP_LABELS: HeatmapLabels = {
+  weekdays: ['Пн', 'Ср', 'Пт'],
+  months: ['янв', 'фев', 'мар', 'апр', 'май', 'июн', 'июл', 'авг', 'сен', 'окт', 'ноя', 'дек'],
+  less: 'меньше',
+  more: 'больше',
+  grid: 'Карта активности по дням',
+  cell: (day) => `${day.date} · ${Math.round(day.minutes / 60)} ч · ${day.sessions} сессий`
 }
 
 const RU_STATUS: Record<GameStatus, string> = {
