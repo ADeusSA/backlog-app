@@ -148,6 +148,21 @@ export const ACTIVITY_TYPES = [
 ] as const
 export type ActivityType = (typeof ACTIVITY_TYPES)[number]
 
+/** Группы событий для фильтра на экране «Активность» (06 §1.7). */
+export const ACTIVITY_CATEGORIES = {
+  library: ['game_added', 'status_changed', 'mastered_set'],
+  ratings: ['rating_set', 'review_written'],
+  sessions: ['playtime_set', 'session_logged'],
+  lists: ['list_created', 'list_item_added', 'list_item_removed'],
+  achievements: ['achievement_unlocked'],
+  catalog: ['catalog_created', 'catalog_edited']
+} as const satisfies Record<string, readonly ActivityType[]>
+export const ACTIVITY_CATEGORY_KEYS = Object.keys(ACTIVITY_CATEGORIES) as ActivityCategory[]
+export type ActivityCategory = keyof typeof ACTIVITY_CATEGORIES
+
+/** Сколько игр помещается в «Топ любимых» (06 §1.4). */
+export const FAVORITES_LIMIT = 10
+
 export const COLLECTION_SCOPES = ['library', 'list', 'series', 'company', 'search', 'catalog'] as const
 export type CollectionScopeKind = (typeof COLLECTION_SCOPES)[number]
 

@@ -2,7 +2,11 @@
 import type { Db } from '../db/connection'
 import { getDb } from '../db/connection'
 import { newId, now } from '../db/utils'
-import { insertActivity, listActivity } from '../db/repositories/activity.repo'
+import {
+  insertActivity,
+  listActivity,
+  type ListActivityOptions
+} from '../db/repositories/activity.repo'
 import type { ActivityDto } from '@shared/schema/entities'
 import type { ActivityType } from '@shared/constants'
 
@@ -26,6 +30,6 @@ export function logActivity(conn: Db, type: ActivityType, input: LogActivityInpu
   })
 }
 
-export function getActivity(opts: { limit: number; gameId?: string }): ActivityDto[] {
+export function getActivity(opts: ListActivityOptions): ActivityDto[] {
   return listActivity(getDb(), opts)
 }

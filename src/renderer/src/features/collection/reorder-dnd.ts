@@ -28,7 +28,8 @@ export interface AttachReorderableParams {
   onDropped: (sourceId: string, sourceIndex: number, targetIndex: number, edge: Edge | null) => void
 }
 
-const REORDER_KEY = 'reorderId'
+/** Ключ данных перетаскиваемого элемента — нужен и внешним целям (корзина в «Топе любимых»). */
+export const REORDER_KEY = 'reorderId'
 const REORDER_INDEX = 'reorderIndex'
 
 export function attachReorderable(params: AttachReorderableParams): () => void {

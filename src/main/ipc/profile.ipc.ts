@@ -11,7 +11,12 @@ export function registerProfileIpc(): void {
   handle('stats.get', () => getStats())
   handle('stats.recap', ({ year }) => getRecap(year))
   handle('activity.list', (input) =>
-    getActivity({ limit: input?.limit ?? 20, ...(input?.gameId ? { gameId: input.gameId } : {}) })
+    getActivity({
+      limit: input?.limit ?? 20,
+      ...(input?.gameId ? { gameId: input.gameId } : {}),
+      ...(input?.category ? { category: input.category } : {}),
+      ...(input?.cursor ? { cursor: input.cursor } : {})
+    })
   )
   handle('profile.nowPlaying', () => nowPlayingCards())
 }

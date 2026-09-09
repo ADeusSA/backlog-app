@@ -138,6 +138,17 @@ export function Breadcrumbs(): React.ReactElement | null {
         { key: 'recap', label: t('recap.heading') }
       ]
     }
+    // Вкладки профиля — свои маршруты, поэтому у них вторая крошка (06 §1).
+    const profileTab = ['activity', 'stats', 'achievements'].find(
+      (tab) => path === `/profile/${tab}`
+    )
+    if (profileTab) {
+      return [
+        { key: 'profile', label: t('nav.profile'), href: '/profile' },
+        { key: 'tab', label: t(`profile.tabs.${profileTab}`) }
+      ]
+    }
+
     if (path.startsWith('/settings')) return [{ key: 'settings', label: t('nav.settings') }]
     if (path.startsWith('/search')) return [{ key: 'search', label: t('common.search') }]
     if (path.startsWith('/dev/ui')) return [{ key: 'dev', label: 'UI' }]

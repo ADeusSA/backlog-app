@@ -5,7 +5,6 @@ import { Toaster } from '@/components/ui/toast'
 import { BloomBackdrop } from '@/components/ui/bloom'
 import { toast } from '@/components/ui/toast'
 import { onAppEvent } from '@/platform/events'
-import { AchievementsModal } from '@/features/achievements/achievements-modal'
 import { Titlebar } from './titlebar'
 import { Sidebar } from './sidebar'
 import { CommandPalette } from './command-palette'
@@ -22,6 +21,7 @@ import { router } from '../router'
  */
 export function AppShell(): React.ReactElement {
   const location = useRouterState({ select: (s) => s.location })
+  const pageKey = location.pathname.startsWith('/profile') ? '/profile' : location.pathname
   const settings = useSettings()
   useGlobalHotkeys()
   useHistoryTracker()
@@ -57,8 +57,12 @@ export function AppShell(): React.ReactElement {
         <div className="relative flex min-h-0 flex-1">
           <Sidebar />
           <main className="relative min-w-0 flex-1 overflow-hidden">
-            {/* key по маршруту перезапускает CSS-анимацию появления экрана (05 §4.4) */}
-            <div key={location.pathname} className="page-enter h-full overflow-y-auto">
+            {/*
+              key по маршруту перезапускает CSS-анимацию появления экрана (05 §4.4).
+              Вкладки профиля — один экран с общей шапкой, поэтому у них общий ключ:
+              иначе при переключении вкладки заново «въезжали» баннер и аватар.
+            */}
+            <div key={pageKey} className="page-enter h-full overflow-y-auto">
               <Outlet />
             </div>
           </main>
@@ -66,7 +70,6 @@ export function AppShell(): React.ReactElement {
         <Toaster />
         <CommandPalette />
         <HotkeysHelp />
-        <AchievementsModal />
       </div>
     </TooltipProvider>
   )

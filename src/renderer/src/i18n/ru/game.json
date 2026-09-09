@@ -97,6 +97,7 @@
   "game.activity.status_changed": "Статус: {{from}} → {{to}}",
   "game.activity.rating_set": "Оценка: {{rating}}",
   "game.activity.playtime_set": "Время изменено — {{hours}}",
+  "game.activity.playtime_added": "Добавлено {{added}} · всего {{total}}",
   "game.activity.session_logged": "Записана игровая сессия",
   "game.activity.list_created": "Создан список «{{name}}»",
   "game.activity.list_item_added": "Добавлена в список «{{name}}»",

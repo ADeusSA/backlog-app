@@ -71,6 +71,14 @@ export function formatDateTime(value: string | null | undefined): string {
   }).format(date)
 }
 
+/** Только время суток — для ленты активности, сгруппированной по дням (06 §1.7). */
+export function formatTime(value: string | null | undefined): string {
+  if (!value) return '—'
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return '—'
+  return new Intl.DateTimeFormat(locale, { hour: '2-digit', minute: '2-digit' }).format(date)
+}
+
 /** Относительное время: «5 минут назад», «вчера», «3 месяца назад». */
 export function formatRelative(value: string | null | undefined): string {
   if (!value) return '—'

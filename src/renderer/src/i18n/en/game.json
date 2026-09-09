@@ -97,6 +97,7 @@
   "game.activity.status_changed": "Status: {{from}} → {{to}}",
   "game.activity.rating_set": "Rated {{rating}}",
   "game.activity.playtime_set": "Playtime changed — {{hours}}",
+  "game.activity.playtime_added": "Added {{added}} · {{total}} total",
   "game.activity.session_logged": "Logged a play session",
   "game.activity.list_created": "Created list \"{{name}}\"",
   "game.activity.list_item_added": "Added to list \"{{name}}\"",

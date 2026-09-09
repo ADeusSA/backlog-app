@@ -1,10 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { Search, Trash2, Upload } from 'lucide-react'
+import { useQueryClient } from '@tanstack/react-query'
+import { Upload } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import type { ProfileDto } from '@shared/schema/entities'
 import { Button } from '@/components/ui/button'
-import { CoverImage } from '@/components/ui/image'
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Input, Textarea } from '@/components/ui/input'
 import { Avatar } from '@/components/ui/avatar'
@@ -36,8 +35,6 @@ export function ProfileEditDialog({ open, onOpenChange, profile }: Props): React
     id: profile.bannerImageId,
     file: profile.bannerFile
   })
-  const [favorites, setFavorites] = useState<string[]>(profile.favoriteGameIds)
-  const [query, setQuery] = useState('')
   const [saving, setSaving] = useState(false)
   const avatarInput = useRef<HTMLInputElement>(null)
   const bannerInput = useRef<HTMLInputElement>(null)
@@ -49,20 +46,7 @@ export function ProfileEditDialog({ open, onOpenChange, profile }: Props): React
     setYearGoal(profile.yearGoal ? String(profile.yearGoal) : '')
     setAvatar({ id: profile.avatarImageId, file: profile.avatarFile })
     setBanner({ id: profile.bannerImageId, file: profile.bannerFile })
-    setFavorites(profile.favoriteGameIds)
   }, [open, profile])
-
-  const { data: found } = useQuery({
-    queryKey: ['games', 'quickSearch', query],
-    queryFn: () => call('games.quickSearch', { q: query, limit: 8 }),
-    enabled: open && query.trim().length >= 2
-  })
-
-  const { data: favoriteCards } = useQuery({
-    queryKey: ['games', 'favorites', favorites],
-    queryFn: () => call('games.quickSearch', { q: '', limit: 50 }),
-    enabled: false
-  })
 
   const pickImage = async (
     file: File | undefined,
@@ -87,7 +71,6 @@ export function ProfileEditDialog({ open, onOpenChange, profile }: Props): React
         bio: bio.trim() || null,
         avatarImageId: avatar.id,
         bannerImageId: banner.id,
-        favoriteGameIds: favorites.slice(0, 4),
         yearGoal: yearGoal.trim() ? Number(yearGoal) : null
       })
       await queryClient.invalidateQueries()
@@ -194,68 +177,6 @@ export function ProfileEditDialog({ open, onOpenChange, profile }: Props): React
               {t('profile.edit.yearGoal.hint')}
             </span>
           </label>
-
-          <div className="flex flex-col gap-2">
-            <span className="type-small" style={{ color: 'var(--text-2)' }}>
-              {t('profile.edit.favorites')}
-            </span>
-            <div className="flex flex-wrap gap-2">
-              {favorites.map((id) => {
-                const card =
-                  profile.favoriteGames.find((game) => game.id === id) ??
-                  favoriteCards?.find((game) => game.id === id)
-                return (
-                  <span key={id} className="flex items-center gap-2 rounded-[var(--r-sm)] px-2 py-1"
-                    style={{ background: 'var(--surface-1)' }}
-                  >
-                    <CoverImage fileName={card?.coverFile ?? null} title={card?.title ?? id} size={24} />
-                    <span className="max-w-[160px] truncate type-small">{card?.title ?? id}</span>
-                    <button
-                      type="button"
-                      aria-label={t('profile.edit.favorites.remove')}
-                      onClick={() => setFavorites((current) => current.filter((value) => value !== id))}
-                    >
-                      <Trash2 size={14} strokeWidth={1.75} style={{ color: 'var(--danger)' }} />
-                    </button>
-                  </span>
-                )
-              })}
-            </div>
-            {favorites.length < 4 && (
-              <>
-                <Input
-                  value={query}
-                  onChange={(event) => setQuery(event.target.value)}
-                  placeholder={t('profile.edit.favorites.search')}
-                  iconLeft={<Search size={14} strokeWidth={1.75} />}
-                />
-                {(found?.length ?? 0) > 0 && (
-                  <ul
-                    className="max-h-[160px] overflow-y-auto rounded-[var(--r-sm)]"
-                    style={{ background: 'var(--surface-1)', border: '1px solid var(--border-1)' }}
-                  >
-                    {found
-                      ?.filter((game) => !favorites.includes(game.id))
-                      .map((game) => (
-                        <li key={game.id}>
-                          <button
-                            type="button"
-                            className="flex w-full items-center gap-2 px-2 py-1.5 text-left type-small hover:bg-[var(--surface-2)]"
-                            onClick={() => {
-                              setFavorites((current) => [...current, game.id].slice(0, 4))
-                              setQuery('')
-                            }}
-                          >
-                            <CoverImage fileName={game.coverFile} title={game.title} size={22} />
-                            {game.title}
-                          </button>
-                        </li>
-                      ))}
-                  </ul>
-                )}
-              </>
-            )}
-          </div>
         </div>
 
         <DialogFooter>

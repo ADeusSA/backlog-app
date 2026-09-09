@@ -69,7 +69,7 @@ export function NowPlaying(): ReactElement {
   }
 
   return (
-    <section className="flex flex-col gap-3 px-6">
+    <section className="flex flex-col gap-3">
       <h2 className="type-caption">{t('profile.nowPlaying.title')}</h2>
 
       {(games?.length ?? 0) === 0 ? (
