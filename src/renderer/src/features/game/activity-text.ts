@@ -33,7 +33,17 @@ export function formatActivityText(
     case 'rating_set':
       return t('game.activity.rating_set', { rating: pick(payload, 'rating') ?? '—' })
     case 'playtime_set': {
-      const minutes = pick(payload, 'minutes') ?? pick(payload, 'delta')
+      // Ключи payload задаёт `user-game.service`: правка поля пишет playtimeMinutes,
+      // кнопки «+15 м / +1 ч» — addedMinutes вместе с новым итогом totalMinutes.
+      const added = pick(payload, 'addedMinutes')
+      if (typeof added === 'number') {
+        const total = pick(payload, 'totalMinutes')
+        return t('game.activity.playtime_added', {
+          added: formatPlaytime(added),
+          total: typeof total === 'number' ? formatPlaytime(total) : '—'
+        })
+      }
+      const minutes = pick(payload, 'playtimeMinutes') ?? pick(payload, 'minutes')
       return t('game.activity.playtime_set', {
         hours: typeof minutes === 'number' ? formatPlaytime(minutes) : '—'
       })

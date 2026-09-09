@@ -27,6 +27,7 @@ import {
   userGameDtoSchema,
   userGamePatchSchema
 } from './schema/entities'
+import { ACTIVITY_CATEGORY_KEYS } from './constants'
 import { collectionQuerySchema, filtersSchema, scopeSchema } from './schema/filters'
 import {
   canonicalGameSchema,
@@ -204,7 +205,8 @@ export const channels = {
   'profile.patch': { input: profilePatchSchema, output: profileDtoSchema },
   'stats.get': { input: nothing, output: statsSchema },
   'stats.recap': { input: z.object({ year: z.number().int().min(1970).max(9999) }), output: recapSchema },
-  'activity.list': { input: z.object({ limit: z.number().int().min(1).max(200).default(20), gameId: idSchema.optional() }).optional(), output: z.array(activityDtoSchema) },
+  /** `cursor` — «<happened_at>|<id>» последней показанной записи: keyset-пагинация для бесконечной ленты (06 §1.7). */
+  'activity.list': { input: z.object({ limit: z.number().int().min(1).max(200).default(20), gameId: idSchema.optional(), category: z.enum(ACTIVITY_CATEGORY_KEYS).optional(), cursor: z.string().optional() }).optional(), output: z.array(activityDtoSchema) },
   'profile.nowPlaying': { input: nothing, output: z.array(gameCardDtoSchema.extend({ resumeNote: z.string().nullable() })) },
 
   /* --------------------------------------------------- достижения */

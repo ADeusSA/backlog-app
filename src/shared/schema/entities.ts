@@ -2,6 +2,7 @@ import { z } from 'zod'
 import {
   ACTIVITY_TYPES,
   COMPANY_ROLES,
+  FAVORITES_LIMIT,
   GAME_CATEGORIES,
   GAME_STATUSES,
   IMAGE_KINDS,
@@ -469,7 +470,7 @@ export const profilePatchSchema = z
     bio: z.string().max(500).nullable().optional(),
     avatarImageId: idSchema.nullable().optional(),
     bannerImageId: idSchema.nullable().optional(),
-    favoriteGameIds: z.array(idSchema).max(4).optional(),
+    favoriteGameIds: z.array(idSchema).max(FAVORITES_LIMIT).optional(),
     yearGoal: z.number().int().min(0).max(1000).nullable().optional()
   })
   .strict()

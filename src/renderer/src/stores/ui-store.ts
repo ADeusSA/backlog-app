@@ -32,9 +32,9 @@ interface UiState {
   hotkeysHelpOpen: boolean
   setHotkeysHelpOpen: (open: boolean) => void
 
-  /** Модальное окно достижений `/achievements` (06 §10). */
-  achievementsOpen: boolean
-  setAchievementsOpen: (open: boolean) => void
+  /** Диалог «Редактировать профиль» — открывается из шапки и из вкладки «Статистика» (06 §1.1). */
+  profileEditOpen: boolean
+  setProfileEditOpen: (open: boolean) => void
 
   /** Поиск внутри коллекции (Ctrl+F). */
   quickFilterOpen: boolean
@@ -84,8 +84,8 @@ export const useUiStore = create<UiState>((set, get) => ({
   hotkeysHelpOpen: false,
   setHotkeysHelpOpen: (open) => set({ hotkeysHelpOpen: open }),
 
-  achievementsOpen: false,
-  setAchievementsOpen: (open) => set({ achievementsOpen: open }),
+  profileEditOpen: false,
+  setProfileEditOpen: (open) => set({ profileEditOpen: open }),
 
   quickFilterOpen: false,
   setQuickFilterOpen: (open) => set({ quickFilterOpen: open })

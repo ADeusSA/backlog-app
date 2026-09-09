@@ -9,7 +9,11 @@ import {
 import { z } from 'zod'
 import { GAME_STATUSES } from '@shared/constants'
 import { AppShell } from './shell/app-shell'
-import { ProfileScreen } from '@/features/profile/profile-screen'
+import { ProfileLayout } from '@/features/profile/profile-layout'
+import { ProfileOverviewTab } from '@/features/profile/overview-tab'
+import { ProfileActivityTab } from '@/features/profile/activity-tab'
+import { ProfileStatsTab } from '@/features/profile/stats-tab'
+import { ProfileAchievementsTab } from '@/features/profile/achievements-tab'
 import { RecapScreen } from '@/features/recap/recap-screen'
 import { LibraryScreen } from '@/features/library/library-screen'
 import { ListsScreen } from '@/features/lists/lists-screen'
@@ -62,10 +66,35 @@ const indexRoute = createRoute({
   }
 })
 
+/** Профиль — общая шапка с вкладками, содержимое вкладок в дочерних маршрутах (06 §1). */
 const profileRoute = createRoute({
   getParentRoute: () => shellRoute,
   path: '/profile',
-  component: ProfileScreen
+  component: ProfileLayout
+})
+
+const profileOverviewRoute = createRoute({
+  getParentRoute: () => profileRoute,
+  path: '/',
+  component: ProfileOverviewTab
+})
+
+const profileActivityRoute = createRoute({
+  getParentRoute: () => profileRoute,
+  path: 'activity',
+  component: ProfileActivityTab
+})
+
+const profileStatsRoute = createRoute({
+  getParentRoute: () => profileRoute,
+  path: 'stats',
+  component: ProfileStatsTab
+})
+
+const profileAchievementsRoute = createRoute({
+  getParentRoute: () => profileRoute,
+  path: 'achievements',
+  component: ProfileAchievementsTab
 })
 
 const recapRoute = createRoute({
@@ -188,7 +217,12 @@ const routeTree = rootRoute.addChildren([
   welcomeRoute,
   shellRoute.addChildren([
     indexRoute,
-    profileRoute,
+    profileRoute.addChildren([
+      profileOverviewRoute,
+      profileActivityRoute,
+      profileStatsRoute,
+      profileAchievementsRoute
+    ]),
     recapRoute,
     libraryRoute,
     listsRoute,
