@@ -117,18 +117,21 @@ export function FavoritesStrip({ games }: { games: GameCardDto[] }): ReactElemen
       {/* Кнопка стоит сразу за заголовком: секция во всю ширину, у правого края она бы «повисла». */}
       <div className="flex items-center gap-3">
         <h2 className="type-caption">{t('profile.favorites.title')}</h2>
-        {cards.length > 1 &&
-          (editing ? (
-            <Button variant="secondary" size="sm" onClick={() => setEditing(false)}>
-              <Check size={14} strokeWidth={1.75} />
-              {t('profile.favorites.done')}
-            </Button>
-          ) : (
+        {/* «Готово» показываем всегда, пока включён режим: иначе после удаления
+            предпоследней обложки кнопка исчезала, а режим оставался включённым. */}
+        {editing ? (
+          <Button variant="secondary" size="sm" onClick={() => setEditing(false)}>
+            <Check size={14} strokeWidth={1.75} />
+            {t('profile.favorites.done')}
+          </Button>
+        ) : (
+          cards.length > 1 && (
             <Button variant="ghost" size="sm" onClick={() => setEditing(true)}>
               <GripHorizontal size={14} strokeWidth={1.75} />
               {t('profile.favorites.reorder')}
             </Button>
-          ))}
+          )
+        )}
       </div>
 
       <ul className="flex gap-3 overflow-x-auto px-0.5 pb-2 pt-1">

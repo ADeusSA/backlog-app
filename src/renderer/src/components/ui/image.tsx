@@ -55,6 +55,9 @@ export function CoverImage({
           alt={title}
           loading="lazy"
           decoding="async"
+          // Иначе браузер начинает собственное перетаскивание картинки и перехватывает
+          // drag-n-drop карточек (ручной порядок коллекции, «Топ любимых»).
+          draggable={false}
           onLoad={() => setLoaded(true)}
           className={cn(
             'absolute inset-0 h-full w-full object-cover transition-opacity',

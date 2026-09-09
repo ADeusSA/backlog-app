@@ -106,6 +106,8 @@
   "game.activity.mastered_set": "Отмечена как 100 %",
   "game.activity.catalog_created": "Создана запись каталога",
   "game.activity.catalog_edited": "Изменена запись каталога",
+  "game.activity.catalog_created_named": "Создана запись каталога «{{name}}»",
+  "game.activity.catalog_edited_named": "Изменена запись каталога «{{name}}»",
   "game.activity.achievement_unlocked": "Достижение открыто: «{{title}}»",
   "game.activity.fallback": "Событие",
   "game.activity.empty": "Истории пока нет",

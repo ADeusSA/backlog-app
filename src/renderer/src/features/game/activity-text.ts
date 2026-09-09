@@ -60,10 +60,20 @@ export function formatActivityText(
       return t('game.activity.review_written')
     case 'mastered_set':
       return t('game.activity.mastered_set')
-    case 'catalog_created':
-      return t('game.activity.catalog_created')
-    case 'catalog_edited':
-      return t('game.activity.catalog_edited')
+    // У записей о студиях, сериях и жанрах игры нет, поэтому подставляем их название:
+    // иначе в ленте подряд идут неотличимые «Создана запись каталога».
+    case 'catalog_created': {
+      const name = pick(payload, 'title') ?? pick(payload, 'name')
+      return name
+        ? t('game.activity.catalog_created_named', { name })
+        : t('game.activity.catalog_created')
+    }
+    case 'catalog_edited': {
+      const name = pick(payload, 'title') ?? pick(payload, 'name')
+      return name
+        ? t('game.activity.catalog_edited_named', { name })
+        : t('game.activity.catalog_edited')
+    }
     case 'achievement_unlocked':
       return t('game.activity.achievement_unlocked', { title: pick(payload, 'title') ?? '' })
     default:

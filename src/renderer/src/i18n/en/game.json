@@ -106,6 +106,8 @@
   "game.activity.mastered_set": "Marked as 100%",
   "game.activity.catalog_created": "Catalog entry created",
   "game.activity.catalog_edited": "Catalog entry edited",
+  "game.activity.catalog_created_named": "Catalog entry created: {{name}}",
+  "game.activity.catalog_edited_named": "Catalog entry edited: {{name}}",
   "game.activity.achievement_unlocked": "Achievement unlocked: \"{{title}}\"",
   "game.activity.fallback": "Event",
   "game.activity.empty": "No history yet",

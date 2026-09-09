@@ -80,10 +80,11 @@ export function ActivityEntry({ entry, variant }: ActivityEntryProps): ReactElem
           <Icon size={13} strokeWidth={1.75} style={{ color: 'var(--text-2)' }} />
         </span>
 
-        {variant === 'full' && (
+        {/* У событий каталога игры нет — пустая заглушка обложки только мешала бы. */}
+        {variant === 'full' && entry.gameTitle && (
           <CoverImage
             fileName={entry.coverFile}
-            title={entry.gameTitle ?? ''}
+            title={entry.gameTitle}
             size={28}
             className="shrink-0"
           />
